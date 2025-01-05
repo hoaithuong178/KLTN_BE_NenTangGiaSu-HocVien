@@ -1,8 +1,10 @@
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
+import { HttpExceptionFilter } from './app/exceptions/http.exception';
+import { CustomRpcExceptionFilter } from './app/exceptions/rpc.exception';
 
 dotenv.config();
 
@@ -30,6 +32,11 @@ async function bootstrap() {
 
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(
+    new CustomRpcExceptionFilter(),
+    new HttpExceptionFilter()
+  );
 
   await app.startAllMicroservices();
   await app.listen(PORT);

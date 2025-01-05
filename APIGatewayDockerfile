@@ -1,0 +1,12 @@
+FROM node:18 as builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npx nx build api-gateway
+
+FROM node:18
+WORKDIR /app
+COPY --from=builder /app/dist/apps/api-gateway/ .
+EXPOSE 4000
+CMD ["node", "main.js"]
