@@ -1,4 +1,4 @@
-import { CreateUser } from '@be/shared';
+import { CreateUser, Login } from '@be/shared';
 import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
@@ -15,5 +15,12 @@ export class AuthController {
     );
 
     return await this.authService.createUser(data);
+  }
+
+  @Post('login')
+  async login(@Body() data: Login) {
+    this.logger.log(`Received request to login ${JSON.stringify(data)}`);
+
+    return await this.authService.login(data);
   }
 }
