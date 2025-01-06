@@ -1,5 +1,5 @@
 import { JWTInput } from '@be/shared';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 const {
   JWT_ACCESS_SECRET,

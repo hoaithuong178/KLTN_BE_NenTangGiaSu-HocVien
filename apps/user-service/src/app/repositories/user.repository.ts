@@ -11,10 +11,24 @@ export class UserRepository {
   }
 
   findUserByEmail(email: string) {
-    return this.prismaService.user.findUnique({ where: { email } });
+    return this.prismaService.user.findUnique({
+      where: { email },
+    });
   }
 
   findUserByPhone(phone: string) {
-    return this.prismaService.user.findUnique({ where: { phone } });
+    return this.prismaService.user.findUnique({
+      where: { phone },
+    });
+  }
+
+  findUserById(id: string) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+    });
+  }
+
+  login(email: string) {
+    return this.prismaService.user.findUnique({ where: { email } });
   }
 }

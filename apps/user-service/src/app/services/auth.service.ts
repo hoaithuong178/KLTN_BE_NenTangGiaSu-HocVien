@@ -1,12 +1,16 @@
-import { AuthResponse, CreateUser, ErrorDetail, Login } from '@be/shared';
+import {
+  AuthResponse,
+  CreateUser,
+  ErrorDetail,
+  generateAccessToken,
+  generateRefreshToken,
+  JWTInput,
+  Login,
+} from '@be/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from '../../utils/jwt.util';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -16,9 +20,14 @@ export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
 
   createAuthResponse(user: User): AuthResponse {
+    const userData: JWTInput = {
+      id: user.id,
+      email: user.email,
+    };
+
     return {
-      accessToken: generateAccessToken(user),
-      refreshToken: generateRefreshToken(user),
+      accessToken: generateAccessToken(userData),
+      refreshToken: generateRefreshToken(userData),
     };
   }
 
@@ -68,7 +77,7 @@ export class AuthService {
   async login({ email, password }: Login) {
     this.logger.log('Logging in with email: ' + email);
 
-    const user = await this.userRepository.findUserByEmail(email);
+    const user = await this.userRepository.login(email);
 
     if (!user) {
       throw new RpcException({

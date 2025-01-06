@@ -20,3 +20,7 @@ export class JWTInput {
   email!: string;
   id!: string;
 }
+
+export class AuthRequest {
+  user!: JWTInput;
+}

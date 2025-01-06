@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
+import { UserController } from './controllers/user.controller';
 import { AuthService } from './services/auth.service';
+import { UserService } from './services/user.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
 
@@ -26,7 +28,7 @@ if (!RABBIT_MQ_URL) {
       },
     ]),
   ],
-  controllers: [AppController, AuthController],
-  providers: [AuthService],
+  controllers: [AppController, AuthController, UserController],
+  providers: [AuthService, UserService],
 })
 export class AppModule {}
