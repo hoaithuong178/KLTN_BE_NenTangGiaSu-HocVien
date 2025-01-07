@@ -1,12 +1,19 @@
-FROM node:18 as builder
+FROM node:18 AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npx nx build user-service
+RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
+RUN npx nx run shared:build --verbose
+RUN npx nx build user-service --verbose
 
 FROM node:18
 WORKDIR /app
 COPY --from=builder /app/dist/apps/user-service/ .
-EXPOSE 3000
+RUN npm install --only=production
+
+COPY --from=builder /app/apps/user-service/prisma/. ./prisma/.
+RUN npx prisma generate
+
+EXPOSE 4001
 CMD ["node", "main.js"]

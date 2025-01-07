@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import {
+  ClientsModule,
+  ClientsModuleOptions,
+  Transport,
+} from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
+import { ContractController } from './controllers/contract.controller';
 import { UserController } from './controllers/user.controller';
 import { AuthService } from './services/auth.service';
+import { ContractService } from './services/contract.service';
 import { UserService } from './services/user.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
@@ -12,23 +18,26 @@ if (!RABBIT_MQ_URL) {
   throw new Error('RABBIT_MQ_URL is not defined');
 }
 
+const registerServices = (...names: Array<string>): ClientsModuleOptions => {
+  return names.map((name) => ({
+    name: `${name}_SERVICE`,
+    transport: Transport.RMQ,
+    options: {
+      urls: [RABBIT_MQ_URL],
+      queue: `${name.toLowerCase()}_queue`,
+      queueOptions: { durable: false },
+    },
+  }));
+};
+
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'USER_SERVICE', // Unique name for the microservice
-        transport: Transport.RMQ,
-        options: {
-          urls: [RABBIT_MQ_URL], // RabbitMQ URL
-          queue: 'user_queue', // Queue name
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ]),
+  imports: [ClientsModule.register(registerServices('USER', 'CONTRACT'))],
+  controllers: [
+    AppController,
+    AuthController,
+    UserController,
+    ContractController,
   ],
-  controllers: [AppController, AuthController, UserController],
-  providers: [AuthService, UserService],
+  providers: [AuthService, UserService, ContractService],
 })
 export class AppModule {}
