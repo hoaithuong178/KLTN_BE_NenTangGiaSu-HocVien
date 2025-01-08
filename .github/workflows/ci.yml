@@ -1,9 +1,9 @@
-name: CI
+name: CI/CD
 
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 permissions:
@@ -11,29 +11,38 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  api-gateway:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Cache node_modules
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+      - name: Build Docker image for api-gateway
+        run: docker build -f APIGatewayDockerfile -t ${{ secrets.DOCKER_USERNAME }}/iteachme-apigateway:latest .
 
-      - run: npm ci --legacy-peer-deps
-      - uses: nrwl/nx-set-shas@v4
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/iteachme-apigateway:latest
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: npx nx-cloud record -- echo Hello World
-      # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
-      - run: npx nx affected -t lint test build
+      - name: Redeploy
+        run: curl -X GET "${{ secrets.API_GATEWAY_DEPLOY_HOOK }}"
+
+  user-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image for user-service
+        run: docker build -f UserServiceDockerfile -t ${{ secrets.DOCKER_USERNAME }}/iteachme-userservice:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/iteachme-userservice:latest
+
+      - name: Redeploy
+        run: curl -X GET "${{ secrets.USER_SERVICE_DEPLOY_HOOK }}"

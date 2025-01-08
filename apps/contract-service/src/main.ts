@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
+import { HealthModule } from './app/health/health.module';
 
 dotenv.config();
 
@@ -28,6 +29,11 @@ async function bootstrap() {
   );
 
   await app.listen();
+
+  const httpApp = await NestFactory.create(HealthModule);
+  const port = process.env.PORT || 4001;
+  await httpApp.listen(port);
+  Logger.log(`HTTP server listening on port ${port}`);
 }
 
 bootstrap();
