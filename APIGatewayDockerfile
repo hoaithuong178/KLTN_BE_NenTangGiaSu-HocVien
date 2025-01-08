@@ -4,7 +4,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npx nx run shared:build
-RUN npx nx build api-gateway
+RUN NX_DAEMON=false npx nx build api-gateway
 
 FROM node:18
 WORKDIR /app
