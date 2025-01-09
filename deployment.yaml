@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teachme-apigateway-deployment
+  labels:
+    app: teachme-apigateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: teachme-apigateway
+  template:
+    metadata:
+      labels:
+        app: teachme-apigateway
+    spec:
+      containers:
+        - name: teachme-apigateway
+          image: thaoanhhaa1/iteachme-apigateway:latest
+          ports:
+            - containerPort: 4000
