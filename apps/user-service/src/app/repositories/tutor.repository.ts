@@ -20,4 +20,21 @@ export class TutorRepository {
       },
     });
   }
+
+  getTutorById(id: string) {
+    return this.prismaService.tutorProfile.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
+    return this.prismaService.tutorProfile.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
 }

@@ -11,4 +11,14 @@ export class TutorService {
   createTutor(data: CreateTutor) {
     return this.tutorService.send({ cmd: 'create_tutor' }, data).toPromise();
   }
+
+  getTutorById(id: string) {
+    return this.tutorService.send({ cmd: 'get_tutor' }, id).toPromise();
+  }
+
+  updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
+    return this.tutorService
+      .send({ cmd: 'update_tutor' }, { id, data })
+      .toPromise();
+  }
 }

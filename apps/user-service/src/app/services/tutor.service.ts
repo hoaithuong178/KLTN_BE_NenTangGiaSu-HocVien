@@ -13,4 +13,12 @@ export class TutorService {
 
     return this.tutorRepository.createTutor(data);
   }
+
+  getTutorById(id: string) {
+    return this.tutorRepository.getTutorById(id);
+  }
+
+  updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
+    return this.tutorRepository.updateTutor(id, data);
+  }
 }

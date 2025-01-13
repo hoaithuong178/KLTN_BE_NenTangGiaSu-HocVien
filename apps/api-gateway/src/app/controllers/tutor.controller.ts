@@ -2,7 +2,9 @@ import { AuthRequest, CreateTutorReq } from '@be/shared';
 import {
   Body,
   Controller,
+  Get,
   Logger,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -28,5 +30,26 @@ export class TutorController {
       ...data,
       id: request.user.id,
     });
+  }
+
+  @Patch()
+  @UseGuards(AuthGuard)
+  async updateTutor(
+    @Request() request: AuthRequest,
+    @Body() data: Partial<CreateTutorReq>
+  ) {
+    this.logger.log(
+      `Received request to update tutor with data: ${JSON.stringify(data)}`
+    );
+
+    return await this.tutorService.updateTutor(request.user.id, data);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  async getTutor(@Request() request: AuthRequest) {
+    this.logger.log(`Received request to get tutor`);
+
+    return await this.tutorService.getTutorById(request.user.id);
   }
 }

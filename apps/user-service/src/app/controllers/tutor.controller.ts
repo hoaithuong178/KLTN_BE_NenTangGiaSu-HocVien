@@ -11,4 +11,14 @@ export class TutorController {
   createTutor(data: CreateTutor) {
     return this.tutorService.createTutor(data);
   }
+
+  @MessagePattern({ cmd: 'get_tutor' })
+  getTutorById(id: string) {
+    return this.tutorService.getTutorById(id);
+  }
+
+  @MessagePattern({ cmd: 'update_tutor' })
+  updateTutor(data: { id: string; data: Partial<Omit<CreateTutor, 'id'>> }) {
+    return this.tutorService.updateTutor(data.id, data.data);
+  }
 }
