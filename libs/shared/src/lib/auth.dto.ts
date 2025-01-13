@@ -1,13 +1,30 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { CreateUser } from './user.dto';
 
 export class Login {
-  @IsString()
-  @IsNotEmpty()
-  @IsEmail()
+  @IsString({
+    message: 'email: Email không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'email: Email không được để trống',
+  })
+  @IsEmail(
+    {},
+    {
+      message: 'email: Email không đúng định dạng',
+    }
+  )
   email!: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsString({
+    message: 'password: Mật khẩu không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'password: Mật khẩu không được để trống',
+  })
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, {
+    message: 'password: Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số',
+  })
   password!: string;
 }
 
@@ -23,4 +40,33 @@ export class JWTInput {
 
 export class AuthRequest {
   user!: JWTInput;
+}
+
+export class OTPRegister {
+  @IsString({
+    message: 'Email không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'Email không được để trống',
+  })
+  @IsEmail(
+    {},
+    {
+      message: 'Email không đúng định dạng',
+    }
+  )
+  email!: string;
+}
+
+export class Register extends CreateUser {
+  @IsString({
+    message: 'otp: OTP không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'otp: OTP không được để trống',
+  })
+  @Matches(/^[0-9]{6}$/, {
+    message: 'otp: OTP phải có 6 chữ số',
+  })
+  otp!: string;
 }

@@ -1,16 +1,19 @@
 import {
   AuthResponse,
-  CreateUser,
   ErrorDetail,
   generateAccessToken,
   generateRefreshToken,
   JWTInput,
   Login,
+  Register,
 } from '@be/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import sendEmail from '../configs/email.config';
+import otp from '../configs/otp.config';
+import Redis from '../configs/redis.config';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -31,15 +34,20 @@ export class AuthService {
     };
   }
 
-  async createUser(data: CreateUser) {
+  // TODO: check otp code
+  async createUser({ otp, ...data }: Register) {
     this.logger.log('Creating user with data: ' + JSON.stringify(data));
 
-    const [email, phone] = await Promise.all([
+    const [email, phone, otpCode] = await Promise.all([
       this.userRepository.findUserByEmail(data.email),
       this.userRepository.findUserByPhone(data.phone),
+      Redis.getInstance().getClient().get(data.email),
     ]);
 
-    if (phone || email) {
+    this.logger.log(`OTP code: ${otpCode}`);
+    const isValidOtp = otpCode === otp;
+
+    if (phone || email || !isValidOtp) {
       const details: Array<ErrorDetail> = [];
 
       if (phone) {
@@ -56,9 +64,19 @@ export class AuthService {
         });
       }
 
+      if (!isValidOtp) {
+        details.push({
+          field: 'otp',
+          message: 'Mã OTP không hợp lệ',
+        });
+      }
+
       throw new RpcException({
         statusCode: 409,
-        message: 'Thông tin đã tồn tại',
+        message: details.reduce(
+          (acc, cur) => [...acc, `${cur.field}: ${cur.message}`],
+          []
+        ),
         success: false,
         details,
       });
@@ -82,7 +100,7 @@ export class AuthService {
     if (!user) {
       throw new RpcException({
         statusCode: 404,
-        message: 'Email không tồn tại',
+        message: ['email: Email không tồn tại'],
         success: false,
       });
     }
@@ -92,11 +110,51 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new RpcException({
         statusCode: 401,
-        message: 'Mật khẩu không chính xác',
+        message: ['password: Mật khẩu không chính xác'],
         success: false,
       });
     }
 
     return this.createAuthResponse(user);
+  }
+
+  async otpRegister(email: string) {
+    this.logger.log(`Sending OTP to email: ${email}`);
+
+    const user = await this.userRepository.findUserByEmail(email);
+
+    if (user) {
+      throw new RpcException({
+        statusCode: 409,
+        message: ['email: Email đã tồn tại'],
+      });
+    }
+
+    const otpCode = otp.generate();
+
+    await Promise.all([
+      sendEmail({
+        receiver: email,
+        locals: {
+          appLink: process.env.FE_URL,
+          OTP: otpCode,
+          title: 'OTP Verification',
+        },
+        subject: 'OTP Verification',
+        template: 'verifyEmail',
+      }),
+      Redis.getInstance()
+        .getClient()
+        .set(email, otpCode, {
+          EX: 60 * 5,
+        }),
+    ]);
+
+    Logger.log(`OTP code: ${otpCode}`);
+
+    return {
+      message: 'OTP đã được gửi',
+      statusCode: 200,
+    };
   }
 }

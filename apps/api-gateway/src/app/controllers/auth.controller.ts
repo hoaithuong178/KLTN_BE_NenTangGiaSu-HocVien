@@ -1,4 +1,4 @@
-import { CreateUser, Login } from '@be/shared';
+import { Login, OTPRegister, Register } from '@be/shared';
 import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
@@ -9,7 +9,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async getUser(@Body() data: CreateUser) {
+  async getUser(@Body() data: Register) {
     this.logger.log(
       `Received request to register user ${JSON.stringify(data)}`
     );
@@ -22,5 +22,12 @@ export class AuthController {
     this.logger.log(`Received request to login ${JSON.stringify(data)}`);
 
     return await this.authService.login(data);
+  }
+
+  @Post('otp-register')
+  async otpRegister(@Body() data: OTPRegister) {
+    this.logger.log(`Received request to register OTP ${JSON.stringify(data)}`);
+
+    return await this.authService.otpRegister(data.email);
   }
 }

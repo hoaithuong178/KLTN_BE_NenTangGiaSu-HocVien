@@ -4,6 +4,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
 import { HealthModule } from './app/health/health.module';
+import Redis from './app/configs/redis.config';
 
 dotenv.config();
 
@@ -29,6 +30,9 @@ async function bootstrap() {
   );
 
   await app.listen();
+
+  await Redis.getInstance().getClient().connect();
+  Logger.log('Connected to Redis');
 
   const httpApp = await NestFactory.create(HealthModule);
   const port = process.env.PORT || 4001;
