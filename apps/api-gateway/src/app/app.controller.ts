@@ -11,4 +11,9 @@ export class AppController {
   async test() {
     return 'Hello from API Gateway';
   }
+
+  @Get('rabbit-mq')
+  async testRabbitMQ() {
+    return this.userService.send({ cmd: 'rabbit-mq' }, {});
+  }
 }

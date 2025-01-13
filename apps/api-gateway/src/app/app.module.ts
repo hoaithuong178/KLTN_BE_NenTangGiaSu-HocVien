@@ -7,9 +7,11 @@ import {
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
 import { ContractController } from './controllers/contract.controller';
+import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { AuthService } from './services/auth.service';
 import { ContractService } from './services/contract.service';
+import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
@@ -37,7 +39,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     AuthController,
     UserController,
     ContractController,
+    TutorController,
   ],
-  providers: [AuthService, UserService, ContractService],
+  providers: [AuthService, UserService, ContractService, TutorService],
 })
 export class AppModule {}
