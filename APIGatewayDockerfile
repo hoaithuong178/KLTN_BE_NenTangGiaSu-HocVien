@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
 RUN npx nx run shared:build
 RUN NX_DAEMON=false npx nx build api-gateway
 
