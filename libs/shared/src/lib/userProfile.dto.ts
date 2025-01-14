@@ -1,8 +1,8 @@
 import { Gender } from '@prisma/client';
 import {
   IsDateString,
-  IsEnum,
   IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -32,8 +32,11 @@ export class CreateUserProfileReq {
   })
   dob!: string;
 
-  @IsEnum(Gender, {
-    message: 'gender: Giới tính không hợp lệ',
+  @IsString({
+    message: 'geder: Giới tính không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'gender: Giới tính không được để trống',
   })
   @IsIn(['MALE', 'FEMALE', 'OTHER'], {
     message: 'gender: Giới tính phải là MALE, FEMLAE hoặc OTHER',
