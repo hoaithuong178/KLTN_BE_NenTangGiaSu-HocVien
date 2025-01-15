@@ -129,3 +129,14 @@ export class CreateTutorReq {
 export class CreateTutor extends CreateTutorReq {
   id!: string;
 }
+
+export class SearchTutor {
+  specialization?: string;
+  location?: string;
+  fromPrice?: number;
+  toPrice?: number;
+  gender?: string;
+  level?: TutorLevel;
+  rating?: number;
+  learningType?: LearningType;
+}

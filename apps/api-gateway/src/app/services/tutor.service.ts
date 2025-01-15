@@ -1,4 +1,4 @@
-import { CreateTutor } from '@be/shared';
+import { CreateTutor, SearchTutor } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -20,5 +20,9 @@ export class TutorService {
     return this.tutorService
       .send({ cmd: 'update_tutor' }, { id, data })
       .toPromise();
+  }
+
+  searchTutor(data: SearchTutor) {
+    return this.tutorService.send({ cmd: 'search_tutor' }, data).toPromise();
   }
 }

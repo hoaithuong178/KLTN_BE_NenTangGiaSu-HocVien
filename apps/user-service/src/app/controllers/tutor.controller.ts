@@ -1,4 +1,4 @@
-import { CreateTutor } from '@be/shared';
+import { CreateTutor, SearchTutor } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { TutorService } from '../services/tutor.service';
@@ -37,5 +37,10 @@ export class TutorController {
       this.userService.signToElasticSearch(data.id).catch(console.error);
 
     return result;
+  }
+
+  @MessagePattern({ cmd: 'search_tutor' })
+  searchTutor(data: SearchTutor) {
+    return this.tutorService.searchTutor(data);
   }
 }

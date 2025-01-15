@@ -1,4 +1,4 @@
-import { AuthRequest, CreateTutorReq } from '@be/shared';
+import { AuthRequest, CreateTutorReq, SearchTutor } from '@be/shared';
 import {
   Body,
   Controller,
@@ -6,6 +6,7 @@ import {
   Logger,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -51,5 +52,14 @@ export class TutorController {
     this.logger.log(`Received request to get tutor`);
 
     return await this.tutorService.getTutorById(request.user.id);
+  }
+
+  @Get('search')
+  async searchTutor(@Query() data: SearchTutor) {
+    this.logger.log(
+      `Received request to search tutor with data: ${JSON.stringify(data)}`
+    );
+
+    return await this.tutorService.searchTutor(data);
   }
 }
