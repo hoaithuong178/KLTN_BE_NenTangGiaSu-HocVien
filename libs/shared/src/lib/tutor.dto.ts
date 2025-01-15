@@ -1,6 +1,9 @@
+import { LearningType, TutorLevel } from '@prisma/client';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsIn,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -73,6 +76,54 @@ export class CreateTutorReq {
     message: 'fee: Phí phải lớn hơn hoặc bằng 0',
   })
   fee!: number;
+
+  @IsString({
+    message: 'level: Trình độ không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'level: Trình độ không được để trống',
+  })
+  @IsIn(
+    [
+      'L1',
+      'L2',
+      'L3',
+      'L4',
+      'L5',
+      'L6',
+      'L7',
+      'L8',
+      'L9',
+      'L10',
+      'L11',
+      'L12',
+      'UNIVERSITY',
+      'COLLAGE',
+      'HIGH_SCHOOL',
+    ],
+    {
+      message:
+        'level: Trình độ phải là một trong các giá trị: L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, UNIVERSITY, COLLAGE, HIGH_SCHOOL',
+    }
+  )
+  level!: TutorLevel;
+
+  @IsArray({
+    message: 'learningTypes: Hình thức học phải là một mảng',
+  })
+  @ArrayNotEmpty({
+    message: 'learningTypes: Hình thức học không được để trống',
+  })
+  @IsString({
+    each: true,
+    message: 'learningTypes: Mỗi hình thức học phải là chuỗi ký tự',
+  })
+  @IsIn(['ONLINE', 'OFFLINE'], {
+    each: true,
+    message:
+      'learningTypes: Mỗi hình thức học phải là một trong các giá trị: ONLINE, OFFLINE',
+  })
+  learningTypes!: LearningType[];
 }
 
 export class CreateTutor extends CreateTutorReq {

@@ -77,16 +77,41 @@ model UserProfile {
   @@map("user_profiles")
 }
 
+enum TutorLevel {
+  L1
+  L2
+  L3
+  L4
+  L5
+  L6
+  L7
+  L8
+  L9
+  L10
+  L11
+  L12
+  UNIVERSITY
+  COLLAGE
+  HIGH_SCHOOL
+}
+
+enum LearningType {
+  ONLINE
+  OFFLINE
+}
+
 model TutorProfile {
-  id                  String   @id
+  id                  String         @id
   specializations     String[]
   experiences         Int
-  rating              Float    @default(0)
-  taughtStudentsCount Int      @default(0) @map("taught_students_count")
+  rating              Float          @default(0)
+  taughtStudentsCount Int            @default(0) @map("taught_students_count")
   tutorLocations      String[]
-  hourlyPrice         Float    @map("hourly_price")
+  hourlyPrice         Float          @map("hourly_price")
   fee                 Float
-  user                User     @relation(fields: [id], references: [id])
+  level               TutorLevel
+  learningTypes       LearningType[] @map("learning_types")
+  user                User           @relation(fields: [id], references: [id])
 
   @@map("tutor_profiles")
 }

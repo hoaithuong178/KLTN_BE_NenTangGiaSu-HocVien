@@ -31,4 +31,19 @@ export class UserRepository {
   login(email: string) {
     return this.prismaService.user.findUnique({ where: { email } });
   }
+
+  getFullInfo(id: string) {
+    return this.prismaService.user.findUnique({
+      where: {
+        id,
+        tutorProfiles: {
+          some: {},
+        },
+      },
+      include: {
+        userProfiles: true,
+        tutorProfiles: true,
+      },
+    });
+  }
 }

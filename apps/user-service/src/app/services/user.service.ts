@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import elasticClient from '../configs/elastic.config';
+import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -11,5 +13,53 @@ export class UserService {
     this.logger.log(`Getting user with id: ${id}`);
 
     return this.userRepository.findUserById(id);
+  }
+
+  getFullInfo(id: string) {
+    return this.userRepository.getFullInfo(id);
+  }
+
+  async signToElasticSearch(id: string) {
+    const [tutor, user] = await Promise.all([
+      new Promise<any>((resolve, reject) => {
+        elasticClient
+          .get({
+            index: TUTOR_INDEX,
+            id,
+          })
+          .then(resolve)
+          .catch((error) => {
+            if (error.meta.statusCode === 404) {
+              resolve(error);
+            } else reject(error);
+          });
+      }), // this.getTutorById(id),
+      this.getFullInfo(id),
+    ]);
+
+    if (!user) throw new Error('User not found');
+
+    const { userProfiles, tutorProfiles, ...restData } = user;
+
+    const newData = {
+      ...restData,
+      userProfile: userProfiles.length ? userProfiles[0] : null,
+      tutorProfile: tutorProfiles.length ? tutorProfiles[0] : null,
+    };
+
+    if (tutor.found) {
+      await elasticClient.update({
+        index: TUTOR_INDEX,
+        id: id,
+        body: {
+          doc: newData,
+        },
+      });
+    } else
+      await elasticClient.index({
+        index: TUTOR_INDEX,
+        id: id,
+        body: newData,
+      });
   }
 }

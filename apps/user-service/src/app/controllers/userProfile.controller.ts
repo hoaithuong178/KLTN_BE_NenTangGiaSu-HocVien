@@ -1,20 +1,36 @@
 import { CreateUserProfile, UpdateUserProfile } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import elasticClient from '../configs/elastic.config';
+import { TUTOR_INDEX } from '../constants/elasticsearch.const';
+import { UserService } from '../services/user.service';
 import { UserProfileService } from '../services/userProfile.service';
 
 @Controller('user-profiles')
 export class UserProfileController {
-  constructor(private readonly userProfileService: UserProfileService) {}
+  constructor(
+    private readonly userProfileService: UserProfileService,
+    private readonly userService: UserService
+  ) {}
 
   @MessagePattern({ cmd: 'create_user_profile' })
-  create(data: CreateUserProfile) {
-    return this.userProfileService.create(data);
+  async create(data: CreateUserProfile) {
+    const result = await this.userProfileService.create(data);
+
+    if (result)
+      this.userService.signToElasticSearch(data.id).catch(console.error);
+
+    return result;
   }
 
   @MessagePattern({ cmd: 'update_user_profile' })
-  update(data: { id: string; data: UpdateUserProfile }) {
-    return this.userProfileService.update(data.id, data.data);
+  async update(data: { id: string; data: UpdateUserProfile }) {
+    const result = await this.userProfileService.update(data.id, data.data);
+
+    if (result)
+      this.userService.signToElasticSearch(data.id).catch(console.error);
+
+    return result;
   }
 
   @MessagePattern({ cmd: 'get_user_profile' })
@@ -23,7 +39,21 @@ export class UserProfileController {
   }
 
   @MessagePattern({ cmd: 'delete_user_profile' })
-  delete(id: string) {
-    return this.userProfileService.delete(id);
+  async delete(id: string) {
+    const result = await this.userProfileService.delete(id);
+
+    if (result) {
+      elasticClient
+        .delete({
+          index: TUTOR_INDEX,
+          id,
+        })
+        .then(() => {
+          console.log('Deleted from elasticSearch');
+        })
+        .catch(console.error);
+    }
+
+    return result;
   }
 }
