@@ -12,5 +12,8 @@ WORKDIR /app
 COPY --from=builder /app/dist/apps/api-gateway/ .
 RUN npm install --only=production
 
+COPY --from=builder /app/apps/user-service/prisma/. ./prisma/.
+RUN npx prisma generate
+
 EXPOSE 4000
 CMD ["node", "main.js"]
