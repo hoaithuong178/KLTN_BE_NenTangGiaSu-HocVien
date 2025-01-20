@@ -9,11 +9,13 @@ import { memoryStorage } from 'multer';
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
 import { ContractController } from './controllers/contract.controller';
+import { TimeSlotController } from './controllers/timeSlot.controller';
 import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { AuthService } from './services/auth.service';
 import { ContractService } from './services/contract.service';
+import { TimeSlotService } from './services/timeSlot.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/userProfile.service';
@@ -38,7 +40,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 
 @Module({
   imports: [
-    ClientsModule.register(registerServices('USER', 'CONTRACT')),
+    ClientsModule.register(registerServices('USER', 'CONTRACT', 'EDUCATION')),
     MulterModule.register({
       storage: memoryStorage(),
     }),
@@ -50,6 +52,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ContractController,
     TutorController,
     UserProfileController,
+    TimeSlotController,
   ],
   providers: [
     AuthService,
@@ -57,6 +60,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ContractService,
     TutorService,
     UserProfileService,
+    TimeSlotService,
   ],
 })
 export class AppModule {}

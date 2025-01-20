@@ -19,7 +19,7 @@ export class UserService {
     return this.userRepository.getFullInfo(id);
   }
 
-  async signToElasticSearch(id: string) {
+  async syncToElasticSearch(id: string) {
     const [tutor, user] = await Promise.all([
       new Promise<any>((resolve, reject) => {
         elasticClient

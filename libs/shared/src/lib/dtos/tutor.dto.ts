@@ -1,4 +1,4 @@
-import { LearningType, TutorLevel } from '@prisma/client';
+import { LearningType, TutorLevel } from '.prisma/user-service';
 import {
   ArrayNotEmpty,
   IsArray,

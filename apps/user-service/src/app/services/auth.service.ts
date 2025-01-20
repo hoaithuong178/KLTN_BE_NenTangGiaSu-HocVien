@@ -1,3 +1,4 @@
+import { User } from '.prisma/user-service';
 import {
   AuthResponse,
   ErrorDetail,
@@ -7,9 +8,8 @@ import {
   Login,
   Register,
 } from '@be/shared';
-import { Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
-import { User } from '@prisma/client';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import bcrypt from 'bcryptjs';
 import sendEmail from '../configs/email.config';
 import otp from '../configs/otp.config';
@@ -20,7 +20,10 @@ import { UserRepository } from '../repositories/user.repository';
 export class AuthService {
   private readonly logger: Logger = new Logger(AuthService.name);
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    @Inject('EDUCATION_SERVICE') private readonly educationService: ClientProxy
+  ) {}
 
   createAuthResponse(user: User): AuthResponse {
     const userData: JWTInput = {
@@ -34,7 +37,6 @@ export class AuthService {
     };
   }
 
-  // TODO: check otp code
   async createUser({ otp, ...data }: Register) {
     this.logger.log('Creating user with data: ' + JSON.stringify(data));
 
@@ -88,6 +90,16 @@ export class AuthService {
       ...data,
       password: hashPassword,
     });
+
+    this.educationService
+      .send({ cmd: 'user-create-user' }, user)
+      .toPromise()
+      .then(() => {
+        console.log('User created in education service');
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
     return this.createAuthResponse(user);
   }

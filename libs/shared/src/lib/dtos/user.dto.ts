@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role } from '.prisma/user-service';
 import { IsEmail, IsIn, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateUser {

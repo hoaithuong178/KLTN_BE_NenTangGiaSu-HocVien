@@ -18,7 +18,7 @@ export class UserProfileController {
     const result = await this.userProfileService.create(data);
 
     if (result)
-      this.userService.signToElasticSearch(data.id).catch(console.error);
+      this.userService.syncToElasticSearch(data.id).catch(console.error);
 
     return result;
   }
@@ -28,7 +28,7 @@ export class UserProfileController {
     const result = await this.userProfileService.update(data.id, data.data);
 
     if (result)
-      this.userService.signToElasticSearch(data.id).catch(console.error);
+      this.userService.syncToElasticSearch(data.id).catch(console.error);
 
     return result;
   }

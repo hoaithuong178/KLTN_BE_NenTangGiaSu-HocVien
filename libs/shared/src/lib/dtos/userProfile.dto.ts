@@ -1,4 +1,4 @@
-import { Gender } from '@prisma/client';
+import { Gender } from '.prisma/user-service';
 import {
   IsDateString,
   IsIn,
