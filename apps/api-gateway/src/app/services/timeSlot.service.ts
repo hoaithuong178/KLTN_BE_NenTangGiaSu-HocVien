@@ -19,4 +19,16 @@ export class TimeSlotService {
       .send({ cmd: 'get-time-slots-by-user-id' }, userId)
       .toPromise();
   }
+
+  updateTimeSlot(id: string, data: CreateTimeSlot) {
+    return this.timeSlotService
+      .send({ cmd: 'update-time-slot' }, { id, data })
+      .toPromise();
+  }
+
+  deleteTimeSlot(id: string, userId: string) {
+    return this.timeSlotService
+      .send({ cmd: 'delete-time-slot' }, { id, userId })
+      .toPromise();
+  }
 }

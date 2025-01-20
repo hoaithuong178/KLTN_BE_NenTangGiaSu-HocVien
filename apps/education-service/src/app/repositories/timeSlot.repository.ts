@@ -21,6 +21,31 @@ export class TimeSlotRepository {
       where: {
         userId,
       },
+      orderBy: {
+        startTime: 'asc',
+      },
+    });
+  }
+
+  updateTimeSlot(id: string, { userId, ...data }: CreateTimeSlot) {
+    return this.prismaService.timeSlot.update({
+      where: {
+        id,
+        userId,
+      },
+      data: {
+        startTime: new Date(data.startTime),
+        endTime: new Date(data.endTime),
+      },
+    });
+  }
+
+  deleteTimeSlot(id: string, userId: string) {
+    return this.prismaService.timeSlot.delete({
+      where: {
+        id,
+        userId,
+      },
     });
   }
 }

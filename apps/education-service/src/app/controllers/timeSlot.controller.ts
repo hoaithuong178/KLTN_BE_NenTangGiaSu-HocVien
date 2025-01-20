@@ -16,4 +16,14 @@ export class TimeSlotController {
   getTimeSlotsByUserId(userId: string) {
     return this.timeSlotService.getTimeSlotsByUserId(userId);
   }
+
+  @MessagePattern({ cmd: 'update-time-slot' })
+  updateTimeSlot(data: { id: string; data: CreateTimeSlot }) {
+    return this.timeSlotService.updateTimeSlot(data.id, data.data);
+  }
+
+  @MessagePattern({ cmd: 'delete-time-slot' })
+  deleteTimeSlot(data: { id: string; userId: string }) {
+    return this.timeSlotService.deleteTimeSlot(data.id, data.userId);
+  }
 }

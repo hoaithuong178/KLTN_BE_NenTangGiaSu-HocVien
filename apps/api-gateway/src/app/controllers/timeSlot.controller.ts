@@ -2,9 +2,12 @@ import { AuthRequest, CreateTimeSlotReq } from '@be/shared';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Logger,
+  Param,
   Post,
+  Put,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -38,5 +41,33 @@ export class TimeSlotController {
     this.logger.log(`Received request to get time slots`);
 
     return await this.timeSlotService.getTimeSlotsByUserId(request.user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard)
+  async updateTimeSlot(
+    @Request() request: AuthRequest,
+    @Body() data: CreateTimeSlotReq,
+    @Param('id') id: string
+  ) {
+    this.logger.log(
+      `Received request to update time slot ${JSON.stringify(data)}`
+    );
+
+    return await this.timeSlotService.updateTimeSlot(id, {
+      ...data,
+      userId: request.user.id,
+    });
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  async deleteTimeSlot(
+    @Request() request: AuthRequest,
+    @Param('id') id: string
+  ) {
+    this.logger.log(`Received request to delete time slot ${id}`);
+
+    return await this.timeSlotService.deleteTimeSlot(id, request.user.id);
   }
 }
