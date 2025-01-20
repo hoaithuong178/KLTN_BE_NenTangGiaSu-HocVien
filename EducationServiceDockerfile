@@ -1,0 +1,19 @@
+FROM node:18 AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npx prisma generate --schema=apps/education-service/prisma/schema.prisma
+RUN npx nx run shared:build --verbose
+RUN NX_DAEMON=false npx nx build education-service --verbose
+
+FROM node:18
+WORKDIR /app
+COPY --from=builder /app/dist/apps/education-service/ .
+RUN npm install --only=production
+
+COPY --from=builder /app/apps/education-service/prisma/. ./prisma/.
+RUN npx prisma generate
+
+EXPOSE 4003
+CMD ["node", "main.js"]
