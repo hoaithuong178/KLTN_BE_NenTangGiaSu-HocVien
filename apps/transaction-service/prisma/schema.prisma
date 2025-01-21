@@ -13,3 +13,57 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum ContractStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Contract {
+  id              String         @id @default(cuid())
+  studentId       String         @map("student_id")
+  tutorId         String         @map("tutor_id")
+  classId         String         @map("class_id")
+  startDate       DateTime       @map("start_date")
+  endDate         DateTime       @map("end_date")
+  endDateActual   DateTime       @map("end_date_actual")
+  depositAmount   Float          @map("deposit_amount")
+  totalAmount     Float          @map("total_amount")
+  paidAmount      Float          @map("paid_amount")
+  remainingAmount Float          @map("remaining_amount")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  status          ContractStatus @default(PENDING)
+  payments        Payment[]
+
+  @@map("contracts")
+}
+
+enum PaymentType {
+  DEPOSIT
+  FEE_PER_SESSION
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  contractId String        @map("contract_id")
+  amount     Float         @map("amount")
+  amountEth  Float?        @map("amount_eth")
+  fee        Float?        @map("fee")
+  feeEth     Float?        @map("fee_eth")
+  type       PaymentType
+  status     PaymentStatus @default(PENDING)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  contract   Contract      @relation(fields: [contractId], references: [id])
+
+  @@map("payments")
+}
