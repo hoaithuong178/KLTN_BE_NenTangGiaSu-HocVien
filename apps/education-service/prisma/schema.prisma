@@ -26,24 +26,30 @@ enum UserStatus {
 }
 
 model User {
-  id            String     @id @map("_id")
-  email         String     @unique
-  name          String
-  phone         String     @unique
-  password      String
-  role          Role
-  status        UserStatus @default(ACTIVE)
-  isOnline      Boolean    @default(false) @map("is_online")
-  lastActive    DateTime?  @map("last_active")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  createdBy     String?    @map("created_by")
-  updatedBy     String?    @map("updated_by")
-  createdByUser User?      @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  updatedByUser User?      @relation("UpdatedBy", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  createdUsers  User[]     @relation("CreatedBy")
-  updatedUsers  User[]     @relation("UpdatedBy")
-  timeSlots     TimeSlot[]
+  id             String       @id @map("_id")
+  email          String       @unique
+  name           String
+  phone          String       @unique
+  password       String
+  role           Role
+  status         UserStatus   @default(ACTIVE)
+  isOnline       Boolean      @default(false) @map("is_online")
+  lastActive     DateTime?    @map("last_active")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  createdBy      String?      @map("created_by")
+  updatedBy      String?      @map("updated_by")
+  createdByUser  User?        @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  updatedByUser  User?        @relation("UpdatedBy", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdUsers   User[]       @relation("CreatedBy")
+  updatedUsers   User[]       @relation("UpdatedBy")
+  timeSlots      TimeSlot[]
+  studentClasses Class[]      @relation("student")
+  tutorClasses   Class[]      @relation("tutor")
+  studentRatings Rating[]     @relation("student")
+  tutorRatings   Rating[]     @relation("tutor")
+  complaints     Complaint[]
+  submissions    Submission[]
 
   @@map("users")
 }
@@ -56,4 +62,137 @@ model TimeSlot {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("time_slots")
+}
+
+model Subject {
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  @@map("subjects")
+}
+
+type SubjectClass {
+  id   String
+  name String
+}
+
+enum ClassStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Class {
+  id            String         @id @default(uuid()) @map("_id")
+  studentId     String         @map("student_id")
+  tutorId       String         @map("tutor_id")
+  subjects      SubjectClass[]
+  feePerSession Float          @map("fee_per_session")
+  totalFee      Float          @map("total_fee")
+  status        ClassStatus    @default(PENDING)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  mode          Boolean
+  student       User           @relation("student", fields: [studentId], references: [id])
+  tutor         User           @relation("tutor", fields: [tutorId], references: [id])
+  lessons       Lesson[]
+  ratings       Rating[]
+  complaints    Complaint[]
+  assignments   Assignment[]
+
+  @@map("classes")
+}
+
+enum LessonStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model Lesson {
+  id        String       @id @default(uuid()) @map("_id")
+  classId   String       @map("class_id")
+  startTime DateTime     @map("start_time")
+  endTime   DateTime     @map("end_time")
+  status    LessonStatus @default(SCHEDULED)
+  content   String
+  location  String
+  class     Class        @relation(fields: [classId], references: [id])
+
+  @@map("lessons")
+}
+
+model Rating {
+  id        String   @id @default(uuid()) @map("_id")
+  classId   String   @map("class_id")
+  studentId String   @map("student_id")
+  tutorId   String   @map("tutor_id")
+  rating    Float
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
+  class     Class    @relation(fields: [classId], references: [id])
+  student   User     @relation("student", fields: [studentId], references: [id])
+  tutor     User     @relation("tutor", fields: [tutorId], references: [id])
+
+  @@map("ratings")
+}
+
+enum ComplaintStatus {
+  SENT
+  PROCESSING
+  PENDING
+  REJECTED
+  RESOLVED
+}
+
+model Complaint {
+  id            String          @id @default(uuid()) @map("_id")
+  classId       String          @map("class_id")
+  complainantId String          @map("complainant_id")
+  issue         String
+  status        ComplaintStatus @default(SENT)
+  resolution    String?
+  createdAt     DateTime        @default(now()) @map("created_at")
+  resolvedAt    DateTime?       @map("resolved_at")
+  class         Class           @relation(fields: [classId], references: [id])
+  complainant   User            @relation(fields: [complainantId], references: [id])
+
+  @@map("complaints")
+}
+
+model Assignment {
+  id          String       @id @default(uuid()) @map("_id")
+  classId     String       @map("class_id")
+  title       String
+  description String
+  dueDate     DateTime     @map("due_date")
+  class       Class        @relation(fields: [classId], references: [id])
+  submissions Submission[]
+
+  @@map("assignments")
+}
+
+model Media {
+  id           String      @id @default(uuid()) @map("_id")
+  url          String
+  type         String
+  size         Int
+  submissionId String?
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+
+  @@map("medias")
+}
+
+model Submission {
+  id           String     @id @default(uuid()) @map("_id")
+  assignmentId String     @map("assignment_id")
+  studentId    String     @map("student_id")
+  content      Media[]
+  submittedAt  DateTime   @map("submitted_at")
+  feedback     String?
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  student      User       @relation(fields: [studentId], references: [id])
+
+  @@map("submissions")
 }
