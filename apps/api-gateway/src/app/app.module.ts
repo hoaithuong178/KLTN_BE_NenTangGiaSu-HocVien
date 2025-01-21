@@ -40,7 +40,9 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 
 @Module({
   imports: [
-    ClientsModule.register(registerServices('USER', 'CONTRACT', 'EDUCATION')),
+    ClientsModule.register(
+      registerServices('USER', 'CONTRACT', 'EDUCATION', 'TRANSACTION')
+    ),
     MulterModule.register({
       storage: memoryStorage(),
     }),
