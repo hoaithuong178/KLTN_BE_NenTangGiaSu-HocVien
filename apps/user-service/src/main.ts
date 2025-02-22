@@ -38,6 +38,10 @@ async function bootstrap() {
   await Redis.getInstance().getClient().connect();
   logger.log('Connected to Redis');
 
+  setInterval(() => {
+    Redis.getInstance().getClient().get('123');
+  }, 300000);
+
   await elasticClient.info();
   logger.log('Connected to ElasticSearch');
 
