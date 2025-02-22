@@ -36,6 +36,7 @@ export class AuthResponse {
 export class JWTInput {
   email!: string;
   id!: string;
+  role!: string;
 }
 
 export class AuthRequest {

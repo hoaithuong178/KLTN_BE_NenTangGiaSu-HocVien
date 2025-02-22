@@ -29,6 +29,7 @@ export class AuthService {
     const userData: JWTInput = {
       id: user.id,
       email: user.email,
+      role: user.role,
     };
 
     return {
