@@ -15,8 +15,7 @@ RUN npm install --only=production
 
 COPY --from=builder /app/apps/user-service/prisma/schema.prisma ./prisma/user-schema.prisma
 COPY --from=builder /app/apps/education-service/prisma/schema.prisma ./prisma/education-schema.prisma
-RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
-RUN npx prisma generate --schema=apps/education-service/prisma/schema.prisma
+RUN npx prisma generate
 
 EXPOSE 4003
 CMD ["node", "main.js"]
