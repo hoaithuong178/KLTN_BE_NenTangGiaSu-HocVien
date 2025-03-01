@@ -39,6 +39,8 @@ model User {
   updatedAt      DateTime     @updatedAt @map("updated_at")
   createdBy      String?      @map("created_by")
   updatedBy      String?      @map("updated_by")
+  lovedPosts     String[]     @default([]) @map("loved_posts")
+  lovedTutors    String[]     @default([]) @map("loved_tutors")
   createdByUser  User?        @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   updatedByUser  User?        @relation("UpdatedBy", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   createdUsers   User[]       @relation("CreatedBy")
@@ -84,18 +86,18 @@ enum ClassStatus {
 }
 
 model Class {
-  id            String         @id @default(uuid()) @map("_id")
-  studentId     String         @map("student_id")
-  tutorId       String         @map("tutor_id")
-  subjects      SubjectClass[]
-  feePerSession Float          @map("fee_per_session")
-  totalFee      Float          @map("total_fee")
-  status        ClassStatus    @default(PENDING)
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  id            String       @id @default(uuid()) @map("_id")
+  studentId     String       @map("student_id")
+  tutorId       String       @map("tutor_id")
+  subject       SubjectClass @map("subject")
+  feePerSession Float        @map("fee_per_session")
+  totalFee      Float        @map("total_fee")
+  status        ClassStatus  @default(PENDING)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
   mode          Boolean
-  student       User           @relation("student", fields: [studentId], references: [id])
-  tutor         User           @relation("tutor", fields: [tutorId], references: [id])
+  student       User         @relation("student", fields: [studentId], references: [id])
+  tutor         User         @relation("tutor", fields: [tutorId], references: [id])
   lessons       Lesson[]
   ratings       Rating[]
   complaints    Complaint[]
@@ -165,34 +167,119 @@ model Assignment {
   id          String       @id @default(uuid()) @map("_id")
   classId     String       @map("class_id")
   title       String
-  description String
+  description String?
   dueDate     DateTime     @map("due_date")
   class       Class        @relation(fields: [classId], references: [id])
   submissions Submission[]
+  questions   Media[]
 
   @@map("assignments")
 }
 
 model Media {
   id           String      @id @default(uuid()) @map("_id")
+  name         String
   url          String
   type         String
   size         Int
   submissionId String?
+  assignmentId String?
   submission   Submission? @relation(fields: [submissionId], references: [id])
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id])
 
   @@map("medias")
 }
 
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  NOT_YET
+  UPDATED
+}
+
 model Submission {
-  id           String     @id @default(uuid()) @map("_id")
-  assignmentId String     @map("assignment_id")
-  studentId    String     @map("student_id")
+  id           String           @id @default(uuid()) @map("_id")
+  assignmentId String           @map("assignment_id")
+  studentId    String           @map("student_id")
   content      Media[]
-  submittedAt  DateTime   @map("submitted_at")
+  submittedAt  DateTime         @map("submitted_at")
   feedback     String?
-  assignment   Assignment @relation(fields: [assignmentId], references: [id])
-  student      User       @relation(fields: [studentId], references: [id])
+  score        Float?
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id])
+  student      User             @relation(fields: [studentId], references: [id])
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  status       SubmissionStatus @default(PENDING)
 
   @@map("submissions")
+}
+
+enum Grade {
+  GRADE_1
+  GRADE_2
+  GRADE_3
+  GRADE_4
+  GRADE_5
+  GRADE_6
+  GRADE_7
+  GRADE_8
+  GRADE_9
+  GRADE_10
+  GRADE_11
+  GRADE_12
+  UNIVERSITY
+  AFTER_UNIVERSITY
+  OTHER
+}
+
+model Post {
+  id             String       @id @default(uuid()) @map("_id")
+  user           UserPost     @map("user_id")
+  grade          Grade        @map("grade")
+  postTime       DateTime     @map("post_time")
+  title          String
+  content        String
+  locations      String[]     @default([]) @map("locations")
+  sessionPerWeek Int          @map("session_per_week")
+  duration       Int          @map("duration")
+  subject        SubjectClass @map("subject")
+  schedule       Schedule[]   @map("schedule")
+  requirements   String[]     @default([]) @map("requirements")
+  mode           Boolean      @map("mode")
+  feePerSession  Float        @map("fee_per_session")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+}
+
+type UserPost {
+  id     String
+  name   String
+  avatar String
+}
+
+type Schedule {
+  startTime DateTime
+  endTime   DateTime
+}
+
+enum RequestType {
+  RECEIVE_CLASS
+  TEACH_REQUEST
+}
+
+model Request {
+  id             String       @id @default(uuid()) @map("_id")
+  type           RequestType  @map("type")
+  from           UserPost     @map("from")
+  to             UserPost     @map("to")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  grade          Grade        @map("grade")
+  locations      String[]     @default([]) @map("locations")
+  sessionPerWeek Int          @map("session_per_week")
+  duration       Int          @map("duration")
+  subject        SubjectClass @map("subject")
+  schedule       Schedule[]   @map("schedule")
+  mode           Boolean      @map("mode")
+  feePerSession  Float        @map("fee_per_session")
 }

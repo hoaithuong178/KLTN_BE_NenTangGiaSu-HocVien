@@ -11,4 +11,9 @@ export class UserController {
   getMe(data: JWTInput) {
     return this.userService.getMe(data.id);
   }
+
+  @MessagePattern({ cmd: 'get_user_by_id' })
+  getUserById(data: { id: string }) {
+    return this.userService.getUserById(data.id);
+  }
 }

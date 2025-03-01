@@ -1,4 +1,6 @@
 export * from './lib/dtos/auth.dto';
+export * from './lib/dtos/post.dto';
+export * from './lib/dtos/subject.dto';
 export * from './lib/dtos/timeSlot.dto';
 export * from './lib/dtos/tutor.dto';
 export * from './lib/dtos/user.dto';

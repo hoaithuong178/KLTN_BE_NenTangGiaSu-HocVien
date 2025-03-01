@@ -62,4 +62,8 @@ export class UserService {
         body: newData,
       });
   }
+
+  getUserById(id: string) {
+    return this.userRepository.findUserById(id);
+  }
 }
