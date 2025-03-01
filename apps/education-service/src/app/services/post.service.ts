@@ -27,10 +27,23 @@ export class PostService {
       throw new RpcException('Subject not found');
     }
 
-    return this.postRepository.create({
+    const createdPost = await this.postRepository.create({
       ...data,
       subject,
     });
+
+    // Đồng bộ post mới vào Elasticsearch
+    elasticClient
+      .index({
+        index: POST_ELASTIC_INDEX,
+        id: createdPost.id,
+        body: createdPost,
+      })
+      .catch((error) =>
+        this.logger.error('Lỗi khi đồng bộ post mới vào Elasticsearch:', error)
+      );
+
+    return createdPost;
   }
 
   findAll() {
@@ -43,17 +56,53 @@ export class PostService {
     return this.postRepository.findById(id);
   }
 
-  update(id: string, data: Partial<Post>) {
+  async update(id: string, data: Partial<Post>) {
     this.logger.log('Updating post with data: ' + JSON.stringify(data));
-    return this.postRepository.update(id, data);
+    const updatedPost = await this.postRepository.update(id, data);
+
+    // Đồng bộ post đã cập nhật vào Elasticsearch
+    elasticClient
+      .update({
+        index: POST_ELASTIC_INDEX,
+        id: id,
+        body: {
+          doc: updatedPost,
+        },
+      })
+      .catch((error) =>
+        this.logger.error(
+          'Lỗi khi đồng bộ post đã cập nhật vào Elasticsearch:',
+          error
+        )
+      );
+
+    return updatedPost;
   }
 
-  delete(data: DeletePostRequest) {
+  async delete(data: DeletePostRequest) {
     this.logger.log('Deleting post with data: ' + data);
-    if (data.role === Role.ADMIN)
-      return this.postRepository.delete(data.postId);
+    let deletedPost;
 
-    return this.postRepository.deleteByUser(data.postId, data.userId);
+    if (data.role === Role.ADMIN) {
+      deletedPost = await this.postRepository.delete(data.postId);
+    } else {
+      deletedPost = await this.postRepository.deleteByUser(
+        data.postId,
+        data.userId
+      );
+    }
+
+    // Xóa post khỏi Elasticsearch
+    elasticClient
+      .delete({
+        index: POST_ELASTIC_INDEX,
+        id: data.postId,
+      })
+      .catch((error) =>
+        this.logger.error('Lỗi khi xóa post khỏi Elasticsearch:', error)
+      );
+
+    return deletedPost;
   }
 
   async search(searchRequest: PostSearchRequest) {
