@@ -1,5 +1,5 @@
 import { Role } from '.prisma/user-service';
-import { AuthRequest, CreatePostRequest } from '@be/shared';
+import { AuthRequest, CreatePostRequest, PostSearchRequest } from '@be/shared';
 import {
   Body,
   Controller,
@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -54,6 +55,12 @@ export class PostController {
   async getAllPosts() {
     this.logger.log('Get all posts');
     return this.postService.getAllPosts();
+  }
+
+  @Get('search')
+  async searchPosts(@Query() searchRequest: PostSearchRequest) {
+    this.logger.log(`Search posts with data ${JSON.stringify(searchRequest)}`);
+    return this.postService.searchPosts(searchRequest);
   }
 
   @Get(':id')

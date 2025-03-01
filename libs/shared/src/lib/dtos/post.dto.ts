@@ -164,3 +164,23 @@ export class DeletePostRequest {
   userId!: string;
   role!: Role;
 }
+
+export interface PostSearchRequest {
+  query?: string;
+  grade?: string;
+  title?: string;
+  content?: string;
+  location?: string;
+  sessionPerWeek?: number;
+  minSessionPerWeek?: number;
+  maxSessionPerWeek?: number;
+  minDuration?: number;
+  maxDuration?: number;
+  subject?: string;
+  requirements?: string;
+  mode?: string;
+  minFeePerSession?: number;
+  maxFeePerSession?: number;
+  page?: number;
+  limit?: number;
+}

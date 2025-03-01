@@ -1,4 +1,4 @@
-import { CreatePost, DeletePostRequest } from '@be/shared';
+import { CreatePost, DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -28,5 +28,11 @@ export class PostService {
 
   deletePost(data: DeletePostRequest) {
     return this.postService.send({ cmd: 'delete-post' }, data).toPromise();
+  }
+
+  searchPosts(searchRequest: PostSearchRequest) {
+    return this.postService
+      .send({ cmd: 'search-posts' }, searchRequest)
+      .toPromise();
   }
 }

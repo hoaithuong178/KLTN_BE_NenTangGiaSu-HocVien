@@ -1,5 +1,5 @@
 import { Post } from '.prisma/education-service';
-import { DeletePostRequest } from '@be/shared';
+import { DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { PostService } from '../services/post.service';
@@ -31,5 +31,10 @@ export class PostController {
   @MessagePattern({ cmd: 'delete-post' })
   delete(data: DeletePostRequest) {
     return this.postService.delete(data);
+  }
+
+  @MessagePattern({ cmd: 'search-posts' })
+  search(searchRequest: PostSearchRequest) {
+    return this.postService.search(searchRequest);
   }
 }

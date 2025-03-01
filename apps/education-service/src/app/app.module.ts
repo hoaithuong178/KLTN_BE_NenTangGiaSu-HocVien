@@ -36,4 +36,10 @@ import { UserService } from './services/user.service';
     SubjectRepository,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly postService: PostService) {}
+
+  async onModuleInit() {
+    await this.postService.syncPostsToElasticsearch();
+  }
+}
