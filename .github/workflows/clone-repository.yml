@@ -1,0 +1,35 @@
+name: Clone External Repository
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  clone-repository:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v3
+        with:
+          path: current-repo
+
+      - name: Clone external repository
+        run: |
+          git clone https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_PASSWORD }}@github.com/${{ secrets.GH_USERNAME }}/nest-learn.git cloned-repo
+          cd cloned-repo
+          git checkout main
+
+      - name: List files in cloned repository
+        run: |
+          ls -la cloned-repo
+
+      - name: Copy files from cloned repo
+        run: |
+          cp -r cloned-repo/* current-repo/
+          cd current-repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update from external repository" || echo "No changes to commit"
+          git push
