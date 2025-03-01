@@ -13,8 +13,9 @@ WORKDIR /app
 COPY --from=builder /app/dist/apps/education-service/ .
 RUN npm install --only=production
 
-COPY --from=builder /app/apps/education-service/prisma/. ./prisma/.
-RUN npx prisma generate
+# COPY --from=builder /app/apps/education-service/prisma/. ./prisma/.
+RUN npx prisma generate --schema=apps/education-service/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
 
 EXPOSE 4003
 CMD ["node", "main.js"]
