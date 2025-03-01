@@ -113,6 +113,7 @@ model TutorProfile {
   level               TutorLevel
   learningTypes       LearningType[] @map("learning_types")
   user                User           @relation(fields: [id], references: [id])
+  description         String         @map("description")
 
   @@map("tutor_profiles")
 }

@@ -124,6 +124,11 @@ export class CreateTutorReq {
       'learningTypes: Mỗi hình thức học phải là một trong các giá trị: ONLINE, OFFLINE',
   })
   learningTypes!: LearningType[];
+
+  @IsString({
+    message: 'description: Mô tả không được để trống',
+  })
+  description!: string;
 }
 
 export class CreateTutor extends CreateTutorReq {
