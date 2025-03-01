@@ -1,6 +1,12 @@
-import { CreateTutor, SearchTutor } from '@be/shared';
+import { TutorProfile } from '.prisma/user-service';
+import {
+  BaseResponse,
+  CreateTutor,
+  PaginatedResponse,
+  SearchTutor,
+} from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import elasticClient from '../configs/elastic.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { TutorRepository } from '../repositories/tutor.repository';
@@ -11,18 +17,45 @@ export class TutorService {
 
   constructor(private readonly tutorRepository: TutorRepository) {}
 
-  createTutor(data: CreateTutor) {
+  async createTutor(data: CreateTutor) {
     this.logger.log(`Creating tutor with data: ${JSON.stringify(data)}`);
 
-    return this.tutorRepository.createTutor(data);
+    const tutorProfile = await this.tutorRepository.createTutor(data);
+
+    const response: BaseResponse<TutorProfile> = {
+      statusCode: HttpStatus.CREATED,
+      data: tutorProfile,
+    };
+
+    return response;
   }
 
-  getTutorById(id: string) {
-    return this.tutorRepository.getTutorById(id);
+  async getTutorById(id: string) {
+    this.logger.log(`Getting tutor by ID: ${id}`);
+
+    const tutorProfile = await this.tutorRepository.getTutorById(id);
+
+    const response: BaseResponse<TutorProfile> = {
+      statusCode: HttpStatus.OK,
+      data: tutorProfile,
+    };
+
+    return response;
   }
 
-  updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
-    return this.tutorRepository.updateTutor(id, data);
+  async updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
+    this.logger.log(
+      `Updating tutor with ID: ${id} and data: ${JSON.stringify(data)}`
+    );
+
+    const tutorProfile = await this.tutorRepository.updateTutor(id, data);
+
+    const response: BaseResponse<TutorProfile> = {
+      statusCode: HttpStatus.OK,
+      data: tutorProfile,
+    };
+
+    return response;
   }
 
   async searchTutor({
@@ -34,7 +67,24 @@ export class TutorService {
     learningType,
     level,
     rating,
+    ...params
   }: SearchTutor) {
+    this.logger.log(
+      `Searching tutors with data: ${JSON.stringify({
+        specialization,
+        location,
+        fromPrice,
+        toPrice,
+        gender,
+        learningType,
+        level,
+        rating,
+      })}`
+    );
+
+    const page = Number(params.page || 1);
+    const limit = Number(params.limit || 10);
+
     const filter: QueryDslQueryContainer[] = [];
     const must: QueryDslQueryContainer[] = [];
 
@@ -120,6 +170,8 @@ export class TutorService {
     const result = await elasticClient.search({
       index: TUTOR_INDEX,
       body: {
+        from: (page - 1) * limit,
+        size: limit,
         query: {
           bool: {
             must,
@@ -129,6 +181,29 @@ export class TutorService {
       },
     });
 
-    return result.hits.hits.map((hit) => hit._source);
+    const hits = result.hits.hits;
+    const totalItems =
+      typeof result.hits.total === 'number'
+        ? result.hits.total
+        : result.hits.total.value;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const response: PaginatedResponse<TutorProfile[]> = {
+      statusCode: HttpStatus.OK,
+      data: hits.map((hit) => ({
+        ...(hit._source as TutorProfile),
+        score: hit._score || 0,
+      })),
+      pagination: {
+        totalPages,
+        totalItems,
+        page,
+        pageSize: limit,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+
+    return response;
   }
 }

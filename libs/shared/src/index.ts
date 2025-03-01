@@ -9,3 +9,19 @@ export * from './lib/error';
 export * from './lib/firebase/firebase.util';
 export * from './lib/jwt.util';
 export * from './lib/shared.module';
+
+export interface BaseResponse<T> {
+  statusCode: number;
+  data: T;
+}
+
+export interface PaginatedResponse<T> extends BaseResponse<T> {
+  pagination: {
+    totalPages: number;
+    totalItems: number;
+    page: number;
+    pageSize: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}

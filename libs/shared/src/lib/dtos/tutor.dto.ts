@@ -144,4 +144,6 @@ export class SearchTutor {
   level?: TutorLevel;
   rating?: number;
   learningType?: LearningType;
+  page?: number;
+  limit?: number;
 }

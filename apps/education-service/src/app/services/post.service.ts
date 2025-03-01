@@ -1,8 +1,8 @@
 import { Post } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
-import { DeletePostRequest, PostSearchRequest } from '@be/shared';
+import { BaseResponse, DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { POST_ELASTIC_INDEX } from '../constants';
@@ -43,17 +43,34 @@ export class PostService {
         this.logger.error('Lỗi khi đồng bộ post mới vào Elasticsearch:', error)
       );
 
-    return createdPost;
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.CREATED,
+      data: createdPost,
+    };
+
+    return response;
   }
 
-  findAll() {
+  async findAll() {
     this.logger.log('Getting all posts');
-    return this.postRepository.findAll();
+    const posts = await this.postRepository.findAll();
+
+    const response: BaseResponse<Post[]> = {
+      statusCode: HttpStatus.OK,
+      data: posts,
+    };
+    return response;
   }
 
-  findById(id: string) {
+  async findById(id: string) {
     this.logger.log('Getting post by ID: ' + id);
-    return this.postRepository.findById(id);
+    const post = await this.postRepository.findById(id);
+
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.OK,
+      data: post,
+    };
+    return response;
   }
 
   async update(id: string, data: Partial<Post>) {
@@ -76,7 +93,11 @@ export class PostService {
         )
       );
 
-    return updatedPost;
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.OK,
+      data: updatedPost,
+    };
+    return response;
   }
 
   async delete(data: DeletePostRequest) {
@@ -102,7 +123,11 @@ export class PostService {
         this.logger.error('Lỗi khi xóa post khỏi Elasticsearch:', error)
       );
 
-    return deletedPost;
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.OK,
+      data: deletedPost,
+    };
+    return response;
   }
 
   async search(searchRequest: PostSearchRequest) {
@@ -122,9 +147,10 @@ export class PostService {
       maxFeePerSession,
       minFeePerSession,
       sessionPerWeek,
-      page = 1,
-      limit = 10,
     } = searchRequest;
+
+    const page = Number(searchRequest.page) || 1;
+    const limit = Number(searchRequest.limit) || 10;
 
     const must: QueryDslQueryContainer[] = [];
 
@@ -253,22 +279,32 @@ export class PostService {
             must,
           },
         },
-        // sort: [{ createdAt: 'desc' }],
       },
     });
 
     const hits = response.hits.hits;
-    const total = response.hits.total;
+    const totalItems =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total.value;
+
+    const searchResults = hits.map((hit) => ({
+      ...(hit._source as Post),
+      score: hit._score || 0,
+    }));
+
+    const totalPages = Math.ceil(totalItems / limit);
 
     return {
-      data: hits.map((hit) => ({
-        ...(hit._source as Post),
-        score: hit._score,
-      })),
+      statusCode: HttpStatus.OK,
+      data: searchResults,
       pagination: {
-        total: typeof total === 'number' ? total : total.value,
+        totalPages,
+        totalItems,
         page,
-        limit,
+        pageSize: limit,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       },
     };
   }

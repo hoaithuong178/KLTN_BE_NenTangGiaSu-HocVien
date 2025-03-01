@@ -1,5 +1,6 @@
 import { Subject } from '.prisma/education-service';
-import { Injectable, Logger } from '@nestjs/common';
+import { BaseResponse } from '@be/shared';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { SubjectRepository } from '../repositories/subject.repository';
 
 @Injectable()
@@ -8,28 +9,64 @@ export class SubjectService {
 
   constructor(private readonly subjectRepository: SubjectRepository) {}
 
-  create(data: Subject) {
+  async create(data: Subject) {
     this.logger.log('Creating subject with data: ' + JSON.stringify(data));
-    return this.subjectRepository.create(data);
+
+    const subject: Subject = await this.subjectRepository.create(data);
+
+    const response: BaseResponse<Subject> = {
+      statusCode: HttpStatus.CREATED,
+      data: subject,
+    };
+
+    return response;
   }
 
-  findAll() {
+  async findAll() {
     this.logger.log('Getting all subjects');
-    return this.subjectRepository.findAll();
+    const subjects: Subject[] = await this.subjectRepository.findAll();
+
+    const response: BaseResponse<Subject[]> = {
+      statusCode: HttpStatus.OK,
+      data: subjects,
+    };
+
+    return response;
   }
 
-  findById(id: string) {
+  async findById(id: string) {
     this.logger.log('Getting subject by ID: ' + id);
-    return this.subjectRepository.findById(id);
+    const subject: Subject = await this.subjectRepository.findById(id);
+
+    const response: BaseResponse<Subject> = {
+      statusCode: HttpStatus.OK,
+      data: subject,
+    };
+
+    return response;
   }
 
-  update(id: string, data: Partial<Subject>) {
+  async update(id: string, data: Partial<Subject>) {
     this.logger.log('Updating subject with data: ' + JSON.stringify(data));
-    return this.subjectRepository.update(id, data);
+    const subject: Subject = await this.subjectRepository.update(id, data);
+
+    const response: BaseResponse<Subject> = {
+      statusCode: HttpStatus.OK,
+      data: subject,
+    };
+
+    return response;
   }
 
-  delete(id: string) {
+  async delete(id: string) {
     this.logger.log('Deleting subject with ID: ' + id);
-    return this.subjectRepository.delete(id);
+    await this.subjectRepository.delete(id);
+
+    const response: BaseResponse<Subject> = {
+      statusCode: HttpStatus.OK,
+      data: null,
+    };
+
+    return response;
   }
 }

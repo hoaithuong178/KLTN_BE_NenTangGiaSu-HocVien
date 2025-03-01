@@ -1,6 +1,7 @@
 import { User } from '.prisma/user-service';
 import {
   AuthResponse,
+  BaseResponse,
   ErrorDetail,
   generateAccessToken,
   generateRefreshToken,
@@ -8,7 +9,7 @@ import {
   Login,
   Register,
 } from '@be/shared';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import bcrypt from 'bcryptjs';
 import sendEmail from '../configs/email.config';
@@ -25,17 +26,22 @@ export class AuthService {
     @Inject('EDUCATION_SERVICE') private readonly educationService: ClientProxy
   ) {}
 
-  createAuthResponse(user: User): AuthResponse {
+  async createAuthResponse(user: User) {
     const userData: JWTInput = {
       id: user.id,
       email: user.email,
       role: user.role,
     };
 
-    return {
-      accessToken: generateAccessToken(userData),
-      refreshToken: generateRefreshToken(userData),
+    const response: BaseResponse<AuthResponse> = {
+      statusCode: HttpStatus.OK,
+      data: {
+        accessToken: generateAccessToken(userData),
+        refreshToken: generateRefreshToken(userData),
+      },
     };
+
+    return response;
   }
 
   async createUser({ otp, ...data }: Register) {
@@ -165,9 +171,11 @@ export class AuthService {
 
     Logger.log(`OTP code: ${otpCode}`);
 
-    return {
-      message: 'OTP đã được gửi',
-      statusCode: 200,
+    const response: BaseResponse<string> = {
+      statusCode: HttpStatus.OK,
+      data: 'OTP đã được gửi',
     };
+
+    return response;
   }
 }

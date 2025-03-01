@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { User } from '.prisma/user-service';
+import { BaseResponse } from '@be/shared';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import elasticClient from '../configs/elastic.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { UserRepository } from '../repositories/user.repository';
@@ -9,14 +11,28 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) {}
 
-  getMe(id: string) {
+  async getMe(id: string) {
     this.logger.log(`Getting user with id: ${id}`);
 
-    return this.userRepository.findUserById(id);
+    const user = await this.userRepository.findUserById(id);
+
+    const response: BaseResponse<User> = {
+      statusCode: HttpStatus.OK,
+      data: user,
+    };
+
+    return response;
   }
 
-  getFullInfo(id: string) {
-    return this.userRepository.getFullInfo(id);
+  async getFullInfo(id: string) {
+    const user = await this.userRepository.getFullInfo(id);
+
+    const response: BaseResponse<User> = {
+      statusCode: HttpStatus.OK,
+      data: user,
+    };
+
+    return response;
   }
 
   async syncToElasticSearch(id: string) {
@@ -34,7 +50,7 @@ export class UserService {
             } else reject(error);
           });
       }), // this.getTutorById(id),
-      this.getFullInfo(id),
+      this.userRepository.getFullInfo(id),
     ]);
 
     if (!user) throw new Error('User not found');
@@ -63,7 +79,14 @@ export class UserService {
       });
   }
 
-  getUserById(id: string) {
-    return this.userRepository.findUserById(id);
+  async getUserById(id: string) {
+    const user = await this.userRepository.findUserById(id);
+
+    const response: BaseResponse<User> = {
+      statusCode: HttpStatus.OK,
+      data: user,
+    };
+
+    return response;
   }
 }

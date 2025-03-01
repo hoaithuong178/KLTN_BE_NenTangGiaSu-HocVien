@@ -1,5 +1,6 @@
 import { ErrorDetail } from '@be/shared';
 import { Catch, Injectable, Logger, RpcExceptionFilter } from '@nestjs/common';
+import { ArgumentsHost } from '@nestjs/common/interfaces';
 import { RpcException } from '@nestjs/microservices';
 import { Observable, throwError } from 'rxjs';
 
@@ -20,12 +21,18 @@ interface ResponseError {
 export class CustomRpcExceptionFilter implements RpcExceptionFilter {
   private readonly logger = new Logger(CustomRpcExceptionFilter.name);
 
-  catch(exception: RpcExceptionCustom): Observable<ResponseError> {
+  catch(
+    exception: RpcExceptionCustom,
+    host: ArgumentsHost
+  ): Observable<ResponseError> {
     this.logger.error(JSON.stringify(exception));
+    const ctx = host.switchToRpc();
+    const request = ctx.getContext();
 
     return throwError(() => ({
       statusCode: 400,
       timestamp: new Date().toISOString(),
+      path: request.url,
       message: exception.message || 'An error occurred',
       details: exception.details,
     }));
