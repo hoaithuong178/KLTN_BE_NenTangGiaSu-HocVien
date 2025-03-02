@@ -11,4 +11,9 @@ export class UserController {
   createUser(data: User) {
     return this.userService.createUser(data);
   }
+
+  @MessagePattern({ cmd: 'user-update-avatar' })
+  updateAvatar(data: { userId: string; avatar: string }) {
+    return this.userService.updateAvatar(data.userId, data.avatar);
+  }
 }

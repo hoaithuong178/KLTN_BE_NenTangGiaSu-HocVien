@@ -5,15 +5,36 @@ import {
   UpdateUserProfile,
   uploadFile,
 } from '@be/shared';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
 
 @Injectable()
 export class UserProfileService {
   private readonly logger: Logger = new Logger(UserProfileService.name);
 
-  constructor(private readonly UserProfileRepository: UserProfileRepository) {}
+  constructor(
+    private readonly UserProfileRepository: UserProfileRepository,
+    @Inject('EDUCATION_SERVICE') private readonly educationService: ClientProxy
+  ) {}
+
+  updateAvatar(userId: string, avatar: string) {
+    this.educationService
+      .send(
+        { cmd: 'user-update-avatar' },
+        {
+          userId,
+          avatar,
+        }
+      )
+      .toPromise()
+      .then(() => {
+        this.logger.log('User updated avatar in education service');
+      })
+      .catch((err) => {
+        this.logger.error(err);
+      });
+  }
 
   async create(data: CreateUserProfile) {
     this.logger.log(`Creating user profile with data: ${JSON.stringify(data)}`);
@@ -40,6 +61,8 @@ export class UserProfileService {
       ...data,
       avatar,
     });
+
+    this.updateAvatar(data.id, avatar);
 
     const response: BaseResponse<UserProfile> = {
       statusCode: HttpStatus.OK,
@@ -74,6 +97,8 @@ export class UserProfileService {
       ...data,
       avatar,
     });
+
+    this.updateAvatar(data.id, data.avatar ? avatar : user.avatar);
 
     const response: BaseResponse<UserProfile> = {
       statusCode: HttpStatus.OK,
@@ -111,6 +136,8 @@ export class UserProfileService {
         id
       );
       await this.UserProfileRepository.deleteUserProfile(id);
+
+      this.updateAvatar(userProfile.id, '');
 
       const response: BaseResponse<UserProfile> = {
         statusCode: HttpStatus.OK,

@@ -12,4 +12,8 @@ export class UserService {
     this.logger.log('Creating user with data: ' + JSON.stringify(data));
     return this.userRepository.createUser(data);
   }
+
+  updateAvatar(userId: string, avatar: string) {
+    return this.userRepository.updateAvatar(userId, avatar);
+  }
 }

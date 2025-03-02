@@ -13,4 +13,11 @@ export class UserRepository {
   findById(id: string) {
     return this.prismaService.user.findUnique({ where: { id } });
   }
+
+  updateAvatar(userId: string, avatar: string) {
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: { avatar },
+    });
+  }
 }
