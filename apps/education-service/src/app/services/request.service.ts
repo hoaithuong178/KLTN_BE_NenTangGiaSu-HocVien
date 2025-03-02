@@ -1,4 +1,4 @@
-import { Request } from '.prisma/education-service';
+import { Request, RequestStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import {
   BaseResponse,
@@ -110,6 +110,79 @@ export class RequestService {
         });
       } else throw new RpcException(error);
     }
+  }
+
+  async updateStatus({
+    id,
+    userId,
+    status,
+    feePerSession,
+  }: {
+    id: string;
+    userId: string;
+    status: RequestStatus;
+    feePerSession?: number;
+  }) {
+    const request = await this.requestRepository.findById(id);
+
+    if (!request) {
+      throw new RpcException('Yêu cầu không tồn tại');
+    }
+
+    if (request.status === RequestStatus.CANCELLED) {
+      throw new RpcException('Yêu cầu đã bị hủy');
+    }
+
+    if (request.status === RequestStatus.ACCEPTED) {
+      throw new RpcException('Yêu cầu đã được chấp nhận');
+    }
+
+    if (
+      request.status === RequestStatus.REJECTED &&
+      status !== RequestStatus.PRICE_NEGOTIATION
+    ) {
+      throw new RpcException('Yêu cầu đã bị từ chối');
+    }
+
+    const fromId =
+      request.feePerSessions.length % 2 === 0 ? request.from.id : request.to.id;
+
+    // Kiểm tra quyền cập nhật status
+    switch (status) {
+      case 'ACCEPTED':
+      case 'REJECTED':
+        if (fromId !== userId) {
+          throw new RpcException('Bạn không có quyền thực hiện hành động này');
+        }
+        break;
+      case 'CANCELLED':
+        if (request.from.id !== userId) {
+          throw new RpcException('Bạn không có quyền thực hiện hành động này');
+        }
+        break;
+      case 'PRICE_NEGOTIATION':
+        if (request.from.id !== userId && request.to.id !== userId) {
+          throw new RpcException('Bạn không có quyền thực hiện hành động này');
+        }
+        if (!feePerSession) {
+          throw new RpcException('Vui lòng nhập học phí mới');
+        }
+        break;
+      default:
+        throw new RpcException('Trạng thái không hợp lệ');
+    }
+
+    const updatedRequest = await this.requestRepository.updateStatus(
+      id,
+      status,
+      feePerSession
+    );
+
+    const response: BaseResponse<Request> = {
+      statusCode: HttpStatus.OK,
+      data: updatedRequest,
+    };
+    return response;
   }
 
   async delete({ id, userId, role }: DeleteRequest) {

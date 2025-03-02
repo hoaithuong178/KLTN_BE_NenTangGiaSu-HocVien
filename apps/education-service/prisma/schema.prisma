@@ -269,11 +269,20 @@ enum RequestType {
   TEACH_REQUEST
 }
 
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  PRICE_NEGOTIATION
+}
+
 model Request {
   id             String          @id @default(uuid()) @map("_id")
   type           RequestType     @map("type")
   from           UserPost        @map("from")
   to             UserPost        @map("to")
+  status         RequestStatus   @default(PENDING)
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
   grade          Grade           @map("grade")

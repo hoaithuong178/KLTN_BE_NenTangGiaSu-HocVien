@@ -1,3 +1,4 @@
+import { RequestStatus } from '.prisma/education-service';
 import {
   CreateRequest,
   DeleteRequest,
@@ -52,6 +53,17 @@ export class RequestService {
   update(id: string, data: Partial<UpdateRequest>) {
     return this.requestService
       .send({ cmd: 'update-request' }, { id, data })
+      .toPromise();
+  }
+
+  updateStatus(data: {
+    id: string;
+    userId: string;
+    status: RequestStatus;
+    feePerSession?: number;
+  }) {
+    return this.requestService
+      .send({ cmd: 'update-request-status' }, data)
       .toPromise();
   }
 

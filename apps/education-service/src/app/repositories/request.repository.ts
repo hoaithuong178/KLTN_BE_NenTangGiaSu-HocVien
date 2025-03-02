@@ -1,3 +1,4 @@
+import { RequestStatus } from '.prisma/education-service';
 import { CreateRequest, UpdateRequest } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -152,6 +153,23 @@ export class RequestRepository {
             push: {
               adjustmentTime: new Date(),
               price: feePerSession,
+            },
+          },
+        }),
+      },
+    });
+  }
+
+  updateStatus(id: string, status: RequestStatus, feePerSession?: number) {
+    return this.prismaService.request.update({
+      where: { id },
+      data: {
+        status,
+        ...(feePerSession && {
+          feePerSessions: {
+            push: {
+              price: feePerSession,
+              adjustmentTime: new Date(),
             },
           },
         }),

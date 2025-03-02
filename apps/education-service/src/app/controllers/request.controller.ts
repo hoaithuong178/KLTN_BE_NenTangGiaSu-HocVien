@@ -1,3 +1,4 @@
+import { RequestStatus } from '.prisma/education-service';
 import {
   CreateRequest,
   DeleteRequest,
@@ -45,6 +46,16 @@ export class RequestController {
   @MessagePattern({ cmd: 'update-request' })
   update(data: { id: string; data: Partial<UpdateRequest> }) {
     return this.requestService.update(data.id, data.data);
+  }
+
+  @MessagePattern({ cmd: 'update-request-status' })
+  updateStatus(data: {
+    id: string;
+    userId: string;
+    status: RequestStatus;
+    feePerSession?: number;
+  }) {
+    return this.requestService.updateStatus(data);
   }
 
   @MessagePattern({ cmd: 'delete-request' })

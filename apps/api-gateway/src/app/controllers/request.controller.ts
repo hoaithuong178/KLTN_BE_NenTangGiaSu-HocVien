@@ -1,3 +1,4 @@
+import { RequestStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import {
   AuthRequest,
@@ -12,6 +13,7 @@ import {
   Get,
   Logger,
   Param,
+  Patch,
   Post,
   Put,
   Request,
@@ -125,6 +127,25 @@ export class RequestController {
       id,
       userId: req.user.id,
       role: req.user.role as Role,
+    });
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard)
+  async updateStatus(
+    @Param('id') id: string,
+    @Request() req: AuthRequest,
+    @Body() data: { status: RequestStatus; feePerSession?: number }
+  ) {
+    this.logger.log(
+      `Update request status ${id} with data: ${JSON.stringify(data)}`
+    );
+
+    return this.requestService.updateStatus({
+      id,
+      userId: req.user.id,
+      status: data.status,
+      feePerSession: data.feePerSession,
     });
   }
 
