@@ -9,4 +9,8 @@ export class UserRepository {
   createUser(data: User) {
     return this.prismaService.user.create({ data });
   }
+
+  findById(id: string) {
+    return this.prismaService.user.findUnique({ where: { id } });
+  }
 }

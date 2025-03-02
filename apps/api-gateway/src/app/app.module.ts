@@ -8,6 +8,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
+import { ClassController } from './controllers/class.controller';
 import { ContractController } from './controllers/contract.controller';
 import { PostController } from './controllers/post.controller';
 import { RequestController } from './controllers/request.controller';
@@ -17,6 +18,7 @@ import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { AuthService } from './services/auth.service';
+import { ClassService } from './services/class.service';
 import { ContractService } from './services/contract.service';
 import { PostService } from './services/post.service';
 import { RequestService } from './services/request.service';
@@ -64,6 +66,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     PostController,
     SubjectController,
     RequestController,
+    ClassController,
   ],
   providers: [
     AuthService,
@@ -75,6 +78,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     PostService,
     SubjectService,
     RequestService,
+    ClassService,
   ],
 })
 export class AppModule {}
