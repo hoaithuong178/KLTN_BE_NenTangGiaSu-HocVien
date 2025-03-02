@@ -249,6 +249,8 @@ model Post {
   feePerSession  Float        @map("fee_per_session")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@map("posts")
 }
 
 type UserPost {
@@ -268,18 +270,25 @@ enum RequestType {
 }
 
 model Request {
-  id             String       @id @default(uuid()) @map("_id")
-  type           RequestType  @map("type")
-  from           UserPost     @map("from")
-  to             UserPost     @map("to")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  grade          Grade        @map("grade")
-  locations      String[]     @default([]) @map("locations")
-  sessionPerWeek Int          @map("session_per_week")
-  duration       Int          @map("duration")
-  subject        SubjectClass @map("subject")
-  schedule       Schedule[]   @map("schedule")
-  mode           Boolean      @map("mode")
-  feePerSession  Float        @map("fee_per_session")
+  id             String          @id @default(uuid()) @map("_id")
+  type           RequestType     @map("type")
+  from           UserPost        @map("from")
+  to             UserPost        @map("to")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  grade          Grade           @map("grade")
+  locations      String[]        @default([]) @map("locations")
+  sessionPerWeek Int             @map("session_per_week")
+  duration       Int             @map("duration")
+  subject        SubjectClass    @map("subject")
+  schedule       Schedule[]      @map("schedule")
+  mode           Boolean         @map("mode")
+  feePerSessions FeePerSession[] @map("fee_per_sessions")
+
+  @@map("requests")
+}
+
+type FeePerSession {
+  price          Float
+  adjustmentTime DateTime
 }

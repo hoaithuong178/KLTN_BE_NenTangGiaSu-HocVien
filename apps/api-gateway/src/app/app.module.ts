@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
 import { ContractController } from './controllers/contract.controller';
 import { PostController } from './controllers/post.controller';
+import { RequestController } from './controllers/request.controller';
 import { SubjectController } from './controllers/subject.controller';
 import { TimeSlotController } from './controllers/timeSlot.controller';
 import { TutorController } from './controllers/tutor.controller';
@@ -18,6 +19,7 @@ import { UserProfileController } from './controllers/userProfile.controller';
 import { AuthService } from './services/auth.service';
 import { ContractService } from './services/contract.service';
 import { PostService } from './services/post.service';
+import { RequestService } from './services/request.service';
 import { SubjectService } from './services/subject.service';
 import { TimeSlotService } from './services/timeSlot.service';
 import { TutorService } from './services/tutor.service';
@@ -61,6 +63,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     TimeSlotController,
     PostController,
     SubjectController,
+    RequestController,
   ],
   providers: [
     AuthService,
@@ -71,6 +74,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     TimeSlotService,
     PostService,
     SubjectService,
+    RequestService,
   ],
 })
 export class AppModule {}
