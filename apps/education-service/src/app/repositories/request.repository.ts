@@ -1,5 +1,5 @@
 import { RequestStatus } from '.prisma/education-service';
-import { CreateRequest, UpdateRequest } from '@be/shared';
+import { CreateRequest, UpdateRequest, UserBase } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -190,6 +190,46 @@ export class RequestRepository {
         from: {
           is: {
             id: userId,
+          },
+        },
+      },
+    });
+  }
+
+  updateToUser({ id, avatar, name }: UserBase) {
+    return this.prismaService.request.updateMany({
+      where: {
+        to: {
+          is: {
+            id,
+          },
+        },
+      },
+      data: {
+        to: {
+          update: {
+            ...(name && { name }),
+            ...(avatar && { avatar }),
+          },
+        },
+      },
+    });
+  }
+
+  updateFromUser({ id, avatar, name }: UserBase) {
+    return this.prismaService.request.updateMany({
+      where: {
+        from: {
+          is: {
+            id,
+          },
+        },
+      },
+      data: {
+        from: {
+          update: {
+            ...(name && { name }),
+            ...(avatar && { avatar }),
           },
         },
       },

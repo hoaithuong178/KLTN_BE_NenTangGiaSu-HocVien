@@ -61,3 +61,9 @@ export class CreateUser {
   })
   role!: Role;
 }
+
+export type UserBase = {
+  id: string;
+  name?: string;
+  avatar?: string;
+};

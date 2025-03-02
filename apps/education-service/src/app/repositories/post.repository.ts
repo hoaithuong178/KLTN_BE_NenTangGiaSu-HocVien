@@ -1,4 +1,5 @@
 import { Post } from '.prisma/education-service';
+import { UserBase } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -70,6 +71,26 @@ export class PostRepository {
         user: {
           is: {
             id: userId,
+          },
+        },
+      },
+    });
+  }
+
+  updateUser({ id, avatar, name }: UserBase) {
+    return this.prismaService.post.updateMany({
+      where: {
+        user: {
+          is: {
+            id,
+          },
+        },
+      },
+      data: {
+        user: {
+          update: {
+            ...(name && { name }),
+            ...(avatar && { avatar }),
           },
         },
       },

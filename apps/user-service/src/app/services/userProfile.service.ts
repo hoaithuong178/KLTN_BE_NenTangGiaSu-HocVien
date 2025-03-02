@@ -98,7 +98,7 @@ export class UserProfileService {
       avatar,
     });
 
-    this.updateAvatar(data.id, data.avatar ? avatar : user.avatar);
+    this.updateAvatar(userProfile.id, data.avatar ? avatar : user.avatar);
 
     const response: BaseResponse<UserProfile> = {
       statusCode: HttpStatus.OK,
