@@ -12,6 +12,7 @@ import {
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import bcrypt from 'bcryptjs';
+import { lastValueFrom } from 'rxjs';
 import sendEmail from '../configs/email.config';
 import otp from '../configs/otp.config';
 import Redis from '../configs/redis.config';
@@ -98,9 +99,7 @@ export class AuthService {
       password: hashPassword,
     });
 
-    this.educationService
-      .send({ cmd: 'user-create-user' }, user)
-      .toPromise()
+    lastValueFrom(this.educationService.send({ cmd: 'user-create-user' }, user))
       .then(() => {
         console.log('User created in education service');
       })

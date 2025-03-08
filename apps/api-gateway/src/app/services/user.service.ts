@@ -1,6 +1,7 @@
 import { JWTInput } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -9,10 +10,12 @@ export class UserService {
   ) {}
 
   getMe(data: JWTInput) {
-    return this.userService.send({ cmd: 'get_me' }, data).toPromise();
+    return lastValueFrom(this.userService.send({ cmd: 'get_me' }, data));
   }
 
   getUserById(id: string) {
-    return this.userService.send({ cmd: 'get_user_by_id' }, { id }).toPromise();
+    return lastValueFrom(
+      this.userService.send({ cmd: 'get_user_by_id' }, { id })
+    );
   }
 }

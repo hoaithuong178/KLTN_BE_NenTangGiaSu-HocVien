@@ -6,6 +6,7 @@ import {
 } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class ClassService {
@@ -14,26 +15,28 @@ export class ClassService {
   ) {}
 
   createClass(data: CreateClassRequest) {
-    return this.classService.send({ cmd: 'create-class' }, data).toPromise();
+    return lastValueFrom(this.classService.send({ cmd: 'create-class' }, data));
   }
 
   findById(data: GetClassByIdRequest) {
-    return this.classService.send({ cmd: 'get-class-by-id' }, data).toPromise();
+    return lastValueFrom(
+      this.classService.send({ cmd: 'get-class-by-id' }, data)
+    );
   }
 
   findByUserId(userId: string) {
-    return this.classService
-      .send({ cmd: 'get-classes-by-user' }, userId)
-      .toPromise();
+    return lastValueFrom(
+      this.classService.send({ cmd: 'get-classes-by-user' }, userId)
+    );
   }
 
   updateClass(id: string, data: UpdateClassRequest) {
-    return this.classService
-      .send({ cmd: 'update-class' }, { id, data })
-      .toPromise();
+    return lastValueFrom(
+      this.classService.send({ cmd: 'update-class' }, { id, data })
+    );
   }
 
   deleteClass(data: DeleteClassRequest) {
-    return this.classService.send({ cmd: 'delete-class' }, data).toPromise();
+    return lastValueFrom(this.classService.send({ cmd: 'delete-class' }, data));
   }
 }

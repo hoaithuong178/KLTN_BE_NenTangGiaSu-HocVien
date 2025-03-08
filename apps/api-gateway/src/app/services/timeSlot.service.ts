@@ -1,6 +1,7 @@
 import { CreateTimeSlot } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class TimeSlotService {
@@ -9,26 +10,26 @@ export class TimeSlotService {
   ) {}
 
   createTimeSlots(data: CreateTimeSlot[]) {
-    return this.timeSlotService
-      .send({ cmd: 'create-time-slots' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.timeSlotService.send({ cmd: 'create-time-slots' }, data)
+    );
   }
 
   getTimeSlotsByUserId(userId: string) {
-    return this.timeSlotService
-      .send({ cmd: 'get-time-slots-by-user-id' }, userId)
-      .toPromise();
+    return lastValueFrom(
+      this.timeSlotService.send({ cmd: 'get-time-slots-by-user-id' }, userId)
+    );
   }
 
   updateTimeSlot(id: string, data: CreateTimeSlot) {
-    return this.timeSlotService
-      .send({ cmd: 'update-time-slot' }, { id, data })
-      .toPromise();
+    return lastValueFrom(
+      this.timeSlotService.send({ cmd: 'update-time-slot' }, { id, data })
+    );
   }
 
   deleteTimeSlot(id: string, userId: string) {
-    return this.timeSlotService
-      .send({ cmd: 'delete-time-slot' }, { id, userId })
-      .toPromise();
+    return lastValueFrom(
+      this.timeSlotService.send({ cmd: 'delete-time-slot' }, { id, userId })
+    );
   }
 }

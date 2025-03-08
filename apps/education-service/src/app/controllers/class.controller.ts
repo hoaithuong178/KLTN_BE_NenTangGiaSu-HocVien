@@ -1,4 +1,4 @@
-import { Class } from '.prisma/education-service';
+import { Class, ClassStatus } from '.prisma/education-service';
 import {
   BaseResponse,
   CreateClassRequest,
@@ -47,5 +47,14 @@ export class ClassController {
   async deleteClass(data: DeleteClassRequest): Promise<BaseResponse<Class>> {
     this.logger.log('Deleting class: ' + JSON.stringify(data));
     return this.classService.delete(data);
+  }
+
+  @MessagePattern({ cmd: 'update-class-status' })
+  async updateClassStatus(data: {
+    id: string;
+    status: ClassStatus;
+    userId: string;
+  }): Promise<BaseResponse<Class>> {
+    return this.classService.updateStatus(data.id, data.status, data.userId);
   }
 }

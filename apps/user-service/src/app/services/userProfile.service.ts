@@ -7,8 +7,9 @@ import {
 } from '@be/shared';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { UserProfileRepository } from '../repositories/userProfile.repository';
+import { lastValueFrom } from 'rxjs';
 import { UserRepository } from '../repositories/user.repository';
+import { UserProfileRepository } from '../repositories/userProfile.repository';
 
 @Injectable()
 export class UserProfileService {
@@ -23,15 +24,15 @@ export class UserProfileService {
   ) {}
 
   updateAvatar(userId: string, avatar: string) {
-    this.educationService
-      .send(
+    lastValueFrom(
+      this.educationService.send(
         { cmd: 'user-update-avatar' },
         {
           userId,
           avatar,
         }
       )
-      .toPromise()
+    )
       .then(() => {
         this.logger.log('User updated avatar in education service');
       })

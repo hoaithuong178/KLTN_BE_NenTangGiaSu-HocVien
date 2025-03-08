@@ -7,6 +7,7 @@ import {
 } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class RequestService {
@@ -15,45 +16,45 @@ export class RequestService {
   ) {}
 
   create(data: CreateRequest) {
-    return this.requestService
-      .send({ cmd: 'create-request' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'create-request' }, data)
+    );
   }
 
   findAll() {
-    return this.requestService
-      .send({ cmd: 'get-all-requests' }, {})
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'get-all-requests' }, {})
+    );
   }
 
   findById(data: GetRequestById) {
-    return this.requestService
-      .send({ cmd: 'get-request-by-id' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'get-request-by-id' }, data)
+    );
   }
 
   findByFromUserId(userId: string) {
-    return this.requestService
-      .send({ cmd: 'get-requests-by-from-user-id' }, userId)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'get-requests-by-from-user-id' }, userId)
+    );
   }
 
   findByToUserId(userId: string) {
-    return this.requestService
-      .send({ cmd: 'get-requests-by-to-user-id' }, userId)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'get-requests-by-to-user-id' }, userId)
+    );
   }
 
   findByUserId(userId: string) {
-    return this.requestService
-      .send({ cmd: 'get-requests-by-user-id' }, userId)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'get-requests-by-user-id' }, userId)
+    );
   }
 
   update(id: string, data: Partial<UpdateRequest>) {
-    return this.requestService
-      .send({ cmd: 'update-request' }, { id, data })
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'update-request' }, { id, data })
+    );
   }
 
   updateStatus(data: {
@@ -62,14 +63,14 @@ export class RequestService {
     status: RequestStatus;
     feePerSession?: number;
   }) {
-    return this.requestService
-      .send({ cmd: 'update-request-status' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'update-request-status' }, data)
+    );
   }
 
   delete(data: DeleteRequest) {
-    return this.requestService
-      .send({ cmd: 'delete-request' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.requestService.send({ cmd: 'delete-request' }, data)
+    );
   }
 }

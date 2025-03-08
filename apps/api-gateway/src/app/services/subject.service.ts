@@ -1,6 +1,7 @@
 import { CreateSubjectDto } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class SubjectService {
@@ -9,30 +10,32 @@ export class SubjectService {
   ) {}
 
   create(data: CreateSubjectDto) {
-    return this.subjectService
-      .send({ cmd: 'create-subject' }, data)
-      .toPromise();
+    return lastValueFrom(
+      this.subjectService.send({ cmd: 'create-subject' }, data)
+    );
   }
 
   findAll() {
-    return this.subjectService
-      .send({ cmd: 'get-all-subjects' }, {})
-      .toPromise();
+    return lastValueFrom(
+      this.subjectService.send({ cmd: 'get-all-subjects' }, {})
+    );
   }
 
   findById(id: string) {
-    return this.subjectService
-      .send({ cmd: 'get-subject-by-id' }, id)
-      .toPromise();
+    return lastValueFrom(
+      this.subjectService.send({ cmd: 'get-subject-by-id' }, id)
+    );
   }
 
   update(id: string, data: Partial<CreateSubjectDto>) {
-    return this.subjectService
-      .send({ cmd: 'update-subject' }, { id, data })
-      .toPromise();
+    return lastValueFrom(
+      this.subjectService.send({ cmd: 'update-subject' }, { id, data })
+    );
   }
 
   delete(id: string) {
-    return this.subjectService.send({ cmd: 'delete-subject' }, id).toPromise();
+    return lastValueFrom(
+      this.subjectService.send({ cmd: 'delete-subject' }, id)
+    );
   }
 }

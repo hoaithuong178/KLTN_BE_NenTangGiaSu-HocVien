@@ -76,7 +76,7 @@ export class ClassController {
       throw new UnauthorizedException('Bạn không có quyền cập nhật lớp học');
     }
 
-    if (!data.subject || !data.subject.id || !data.subject.name) {
+    if (!data.subject?.id || !data.subject?.name) {
       throw new BadRequestException('Môn học không hợp lệ');
     }
 

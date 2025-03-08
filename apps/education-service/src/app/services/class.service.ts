@@ -1,12 +1,12 @@
-import { Class, UserPost } from '.prisma/education-service';
+import { Class, ClassStatus, UserPost } from '.prisma/education-service';
 import { Role, User } from '.prisma/user-service';
 import {
-    BaseResponse,
-    ClassDetail,
-    CreateClassRequest,
-    DeleteClassRequest,
-    GetClassByIdRequest,
-    UpdateClassRequest,
+  BaseResponse,
+  ClassDetail,
+  CreateClassRequest,
+  DeleteClassRequest,
+  GetClassByIdRequest,
+  UpdateClassRequest,
 } from '@be/shared';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -197,6 +197,62 @@ export class ClassService {
         });
       }
       throw error;
+    }
+  }
+
+  async updateStatus(
+    id: string,
+    status: ClassStatus,
+    userId: string
+  ): Promise<BaseResponse<Class>> {
+    try {
+      const existingClass = await this.classRepository.findById(id);
+      const statuses: ClassStatus[] = [];
+
+      if (!existingClass) {
+        throw new RpcException('Không tìm thấy lớp học');
+      }
+
+      if (existingClass.status !== ClassStatus.PENDING) {
+        throw new RpcException(
+          'Chỉ có thể cập nhật trạng thái của lớp học đang chờ xác nhận'
+        );
+      }
+
+      const isStudent = userId === existingClass.studentId;
+      const isTutor = userId === existingClass.tutorId;
+
+      if (isStudent) {
+        statuses.push(ClassStatus.IN_PROGRESS, ClassStatus.CANCELLED);
+
+        // Student chỉ có thể chuyển từ PENDING sang IN_PROGRESS hoặc CANCELLED
+        if (!statuses.includes(status)) {
+          throw new RpcException(
+            'Học sinh chỉ có thể xác nhận hoặc hủy lớp học'
+          );
+        }
+      } else if (isTutor) {
+        // Tutor chỉ có thể chuyển từ PENDING sang CANCELLED
+        if (status !== ClassStatus.CANCELLED) {
+          throw new RpcException('Gia sư chỉ có thể hủy lớp học');
+        }
+      } else {
+        throw new RpcException(
+          'Bạn không có quyền cập nhật trạng thái lớp học này'
+        );
+      }
+
+      const updatedClass = await this.classRepository.updateStatus(id, status);
+
+      const response: BaseResponse<Class> = {
+        statusCode: HttpStatus.OK,
+        data: updatedClass,
+      };
+      return response;
+    } catch (error) {
+      throw new RpcException(
+        error.message || 'Lỗi khi cập nhật trạng thái lớp học'
+      );
     }
   }
 }

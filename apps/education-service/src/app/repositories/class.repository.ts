@@ -60,6 +60,13 @@ export class ClassRepository {
     });
   }
 
+  updateStatus(id: string, status: ClassStatus) {
+    return this.prismaService.class.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
   delete(id: string, userId: string) {
     return this.prismaService.class.delete({
       where: { id, OR: [{ studentId: userId }, { tutorId: userId }] },

@@ -1,6 +1,7 @@
 import { Login, Register } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -9,14 +10,14 @@ export class AuthService {
   ) {}
 
   createUser(data: Register) {
-    return this.userService.send({ cmd: 'create_user' }, data).toPromise();
+    return lastValueFrom(this.userService.send({ cmd: 'create_user' }, data));
   }
 
   login(data: Login) {
-    return this.userService.send({ cmd: 'login' }, data).toPromise();
+    return lastValueFrom(this.userService.send({ cmd: 'login' }, data));
   }
 
   otpRegister(data: string) {
-    return this.userService.send({ cmd: 'otp_register' }, data).toPromise();
+    return lastValueFrom(this.userService.send({ cmd: 'otp_register' }, data));
   }
 }

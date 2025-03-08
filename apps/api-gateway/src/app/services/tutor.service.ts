@@ -1,6 +1,7 @@
 import { CreateTutor, SearchTutor } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class TutorService {
@@ -9,20 +10,20 @@ export class TutorService {
   ) {}
 
   createTutor(data: CreateTutor) {
-    return this.tutorService.send({ cmd: 'create_tutor' }, data).toPromise();
+    return lastValueFrom(this.tutorService.send({ cmd: 'create_tutor' }, data));
   }
 
   getTutorById(id: string) {
-    return this.tutorService.send({ cmd: 'get_tutor' }, id).toPromise();
+    return lastValueFrom(this.tutorService.send({ cmd: 'get_tutor' }, id));
   }
 
   updateTutor(id: string, data: Partial<Omit<CreateTutor, 'id'>>) {
-    return this.tutorService
-      .send({ cmd: 'update_tutor' }, { id, data })
-      .toPromise();
+    return lastValueFrom(
+      this.tutorService.send({ cmd: 'update_tutor' }, { id, data })
+    );
   }
 
   searchTutor(data: SearchTutor) {
-    return this.tutorService.send({ cmd: 'search_tutor' }, data).toPromise();
+    return lastValueFrom(this.tutorService.send({ cmd: 'search_tutor' }, data));
   }
 }
