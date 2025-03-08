@@ -44,9 +44,9 @@ export class PostController {
     return this.postService.createPost({
       ...data,
       user: {
-        id: user.id,
-        name: user.name,
-        avatar: user.avatar || '',
+        id: user.data.id,
+        name: user.data.name,
+        avatar: user.data.avatar || '',
       },
     });
   }

@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import {
+  ClientsModule,
+  ClientsModuleOptions,
+  Transport,
+} from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClassController } from './controllers/class.controller';
@@ -21,8 +26,29 @@ import { SubjectService } from './services/subject.service';
 import { TimeSlotService } from './services/timeSlot.service';
 import { UserService } from './services/user.service';
 
+const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
+
+if (!RABBIT_MQ_URL) {
+  throw new Error('RABBIT_MQ_URL is not defined');
+}
+
+const registerServices = (...names: Array<string>): ClientsModuleOptions => {
+  return names.map((name) => ({
+    name: `${name}_SERVICE`,
+    transport: Transport.RMQ,
+    options: {
+      urls: [RABBIT_MQ_URL],
+      queue: `${name.toLowerCase()}_queue`,
+      queueOptions: { durable: false },
+    },
+  }));
+};
+
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    ClientsModule.register(registerServices('CHATBOT_EDUCATION')),
+    PrismaModule,
+  ],
   controllers: [
     AppController,
     UserController,

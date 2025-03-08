@@ -2,8 +2,8 @@ import { Post } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import { BaseResponse, DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { POST_ELASTIC_INDEX } from '../constants';
 import { PostRepository } from '../repositories/post.repository';
@@ -15,7 +15,9 @@ export class PostService {
 
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly subjectRepository: SubjectRepository
+    private readonly subjectRepository: SubjectRepository,
+    @Inject('CHATBOT_EDUCATION_SERVICE')
+    private readonly chatbotEducationService: ClientProxy
   ) {}
 
   async create(data: Post) {
@@ -42,6 +44,8 @@ export class PostService {
       .catch((error) =>
         this.logger.error('Lỗi khi đồng bộ post mới vào Elasticsearch:', error)
       );
+
+    this.chatbotEducationService.emit('post-created', createdPost);
 
     const response: BaseResponse<Post> = {
       statusCode: HttpStatus.CREATED,
@@ -93,6 +97,8 @@ export class PostService {
         )
       );
 
+    this.chatbotEducationService.emit('post-updated', updatedPost);
+
     const response: BaseResponse<Post> = {
       statusCode: HttpStatus.OK,
       data: updatedPost,
@@ -102,7 +108,7 @@ export class PostService {
 
   async delete(data: DeletePostRequest) {
     this.logger.log('Deleting post with data: ' + data);
-    let deletedPost;
+    let deletedPost: Post | null = null;
 
     if (data.role === Role.ADMIN) {
       deletedPost = await this.postRepository.delete(data.postId);
@@ -122,6 +128,8 @@ export class PostService {
       .catch((error) =>
         this.logger.error('Lỗi khi xóa post khỏi Elasticsearch:', error)
       );
+
+    this.chatbotEducationService.emit('post-deleted', deletedPost);
 
     const response: BaseResponse<Post> = {
       statusCode: HttpStatus.OK,
