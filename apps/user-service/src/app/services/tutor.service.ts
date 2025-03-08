@@ -6,16 +6,23 @@ import {
   SearchTutor,
 } from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { TutorRepository } from '../repositories/tutor.repository';
+import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
 export class TutorService {
   private readonly logger: Logger = new Logger(TutorService.name);
 
-  constructor(private readonly tutorRepository: TutorRepository) {}
+  constructor(
+    private readonly tutorRepository: TutorRepository,
+    private readonly userRepository: UserRepository,
+    @Inject('CHATBOT_USER_SERVICE')
+    private readonly client: ClientProxy
+  ) {}
 
   async createTutor(data: CreateTutor) {
     this.logger.log(`Creating tutor with data: ${JSON.stringify(data)}`);
@@ -26,6 +33,10 @@ export class TutorService {
       statusCode: HttpStatus.CREATED,
       data: tutorProfile,
     };
+
+    this.userRepository.getFullInfo(data.id).then((user) => {
+      this.client.emit('user-created', user);
+    });
 
     return response;
   }
@@ -54,6 +65,10 @@ export class TutorService {
       statusCode: HttpStatus.OK,
       data: tutorProfile,
     };
+
+    this.userRepository.getFullInfo(id).then((user) => {
+      this.client.emit('user-updated', user);
+    });
 
     return response;
   }

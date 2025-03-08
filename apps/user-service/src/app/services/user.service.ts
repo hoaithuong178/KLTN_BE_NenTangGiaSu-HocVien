@@ -36,6 +36,8 @@ export class UserService {
   }
 
   async syncToElasticSearch(id: string) {
+    this.logger.log(`Syncing user to ElasticSearch with id: ${id}`);
+
     const [tutor, user] = await Promise.all([
       new Promise<any>((resolve, reject) => {
         elasticClient

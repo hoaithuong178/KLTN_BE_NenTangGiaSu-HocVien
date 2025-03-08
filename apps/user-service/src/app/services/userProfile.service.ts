@@ -8,6 +8,7 @@ import {
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
+import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
 export class UserProfileService {
@@ -15,6 +16,9 @@ export class UserProfileService {
 
   constructor(
     private readonly UserProfileRepository: UserProfileRepository,
+    private readonly userRepository: UserRepository,
+    @Inject('CHATBOT_USER_SERVICE')
+    private readonly chatbotUserService: ClientProxy,
     @Inject('EDUCATION_SERVICE') private readonly educationService: ClientProxy
   ) {}
 
@@ -62,7 +66,12 @@ export class UserProfileService {
       avatar,
     });
 
-    this.updateAvatar(data.id, avatar);
+    this.updateAvatar(userProfile.id, avatar);
+
+    this.userRepository.getFullInfo(userProfile.id).then((user) => {
+      this.logger.log('User: ' + JSON.stringify(user));
+      this.chatbotUserService.emit('user-created', user);
+    });
 
     const response: BaseResponse<UserProfile> = {
       statusCode: HttpStatus.OK,
@@ -96,6 +105,10 @@ export class UserProfileService {
     const userProfile = await this.UserProfileRepository.updateUserProfile(id, {
       ...data,
       avatar,
+    });
+
+    this.userRepository.getFullInfo(id).then((user) => {
+      this.chatbotUserService.emit('user-updated', user);
     });
 
     this.updateAvatar(userProfile.id, data.avatar ? avatar : user.avatar);
@@ -138,6 +151,10 @@ export class UserProfileService {
       await this.UserProfileRepository.deleteUserProfile(id);
 
       this.updateAvatar(userProfile.id, '');
+
+      this.userRepository.getFullInfo(userProfile.id).then((user) => {
+        this.chatbotUserService.emit('user-deleted', user);
+      });
 
       const response: BaseResponse<UserProfile> = {
         statusCode: HttpStatus.OK,

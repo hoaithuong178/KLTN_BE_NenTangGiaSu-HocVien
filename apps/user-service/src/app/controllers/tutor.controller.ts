@@ -16,7 +16,7 @@ export class TutorController {
     const result = await this.tutorService.createTutor(data);
 
     if (result)
-      this.userService.syncToElasticSearch(data.id).catch(console.error);
+      this.userService.syncToElasticSearch(result.data.id).catch(console.error);
 
     return result;
   }
@@ -34,7 +34,7 @@ export class TutorController {
     const result = await this.tutorService.updateTutor(data.id, data.data);
 
     if (result)
-      this.userService.syncToElasticSearch(data.id).catch(console.error);
+      this.userService.syncToElasticSearch(result.data.id).catch(console.error);
 
     return result;
   }
