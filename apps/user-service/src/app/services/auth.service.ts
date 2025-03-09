@@ -1,4 +1,4 @@
-import { User } from '.prisma/user-service';
+import { User, UserStatus } from '.prisma/user-service';
 import {
   AuthResponse,
   BaseResponse,
@@ -129,6 +129,14 @@ export class AuthService {
       throw new RpcException({
         statusCode: 401,
         message: ['password: Mật khẩu không chính xác'],
+        success: false,
+      });
+    }
+
+    if (user.status === UserStatus.BLOCKED) {
+      throw new RpcException({
+        statusCode: 401,
+        message: 'Tài khoản đã bị khóa',
         success: false,
       });
     }

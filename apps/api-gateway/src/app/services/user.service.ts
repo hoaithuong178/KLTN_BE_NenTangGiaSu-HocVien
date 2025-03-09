@@ -1,3 +1,4 @@
+import { UserStatus } from '.prisma/user-service';
 import { JWTInput } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -16,6 +17,18 @@ export class UserService {
   getUserById(id: string) {
     return lastValueFrom(
       this.userService.send({ cmd: 'get_user_by_id' }, { id })
+    );
+  }
+
+  getUsersForAdmin() {
+    return lastValueFrom(
+      this.userService.send({ cmd: 'get_users_for_admin' }, {})
+    );
+  }
+
+  updateUserStatus(id: string, status: UserStatus) {
+    return lastValueFrom(
+      this.userService.send({ cmd: 'update_user_status' }, { id, status })
     );
   }
 }

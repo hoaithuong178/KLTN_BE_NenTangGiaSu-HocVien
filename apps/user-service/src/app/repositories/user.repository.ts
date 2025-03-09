@@ -1,3 +1,4 @@
+import { UserStatus } from '.prisma/user-service';
 import { CreateUser } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -44,6 +45,21 @@ export class UserRepository {
         userProfiles: true,
         tutorProfiles: true,
       },
+    });
+  }
+
+  getUsersForAdmin() {
+    return this.prismaService.user.findMany({
+      include: {
+        userProfiles: true,
+      },
+    });
+  }
+
+  updateUserStatus(id: string, status: UserStatus) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { status },
     });
   }
 }

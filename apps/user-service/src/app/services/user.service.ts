@@ -1,6 +1,7 @@
-import { User } from '.prisma/user-service';
+import { User, UserStatus } from '.prisma/user-service';
 import { BaseResponse } from '@be/shared';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { UserRepository } from '../repositories/user.repository';
@@ -87,6 +88,40 @@ export class UserService {
     const response: BaseResponse<User> = {
       statusCode: HttpStatus.OK,
       data: user,
+    };
+
+    return response;
+  }
+
+  async getUsersForAdmin() {
+    const users = await this.userRepository.getUsersForAdmin();
+
+    const response: BaseResponse<User[]> = {
+      statusCode: HttpStatus.OK,
+      data: users,
+    };
+
+    return response;
+  }
+
+  async updateUserStatus(id: string, status: UserStatus) {
+    this.logger.log(`Updating user status: ${id} - ${status}`);
+
+    const user = await this.userRepository.findUserById(id);
+
+    if (!user) {
+      throw new RpcException({
+        statusCode: 404,
+        message: ['Không tìm thấy người dùng'],
+        success: false,
+      });
+    }
+
+    const updatedUser = await this.userRepository.updateUserStatus(id, status);
+
+    const response: BaseResponse<User> = {
+      statusCode: HttpStatus.OK,
+      data: updatedUser,
     };
 
     return response;
