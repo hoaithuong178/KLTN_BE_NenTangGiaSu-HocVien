@@ -37,10 +37,15 @@ export class JWTInput {
   email!: string;
   id!: string;
   role!: string;
+  jwtId!: string;
+}
+
+export class JWTResponse extends JWTInput {
+  exp!: number;
 }
 
 export class AuthRequest {
-  user!: JWTInput;
+  user!: JWTResponse;
 }
 
 export class OTPRegister {
@@ -70,4 +75,10 @@ export class Register extends CreateUser {
     message: 'otp: OTP phải có 6 chữ số',
   })
   otp!: string;
+}
+
+export class Logout {
+  id!: string;
+  expiredAt!: Date;
+  refreshToken!: string;
 }

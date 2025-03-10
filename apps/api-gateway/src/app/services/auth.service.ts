@@ -1,4 +1,4 @@
-import { Login, Register } from '@be/shared';
+import { Login, Logout, Register } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -19,5 +19,9 @@ export class AuthService {
 
   otpRegister(data: string) {
     return lastValueFrom(this.userService.send({ cmd: 'otp_register' }, data));
+  }
+
+  logout(data: Logout) {
+    return lastValueFrom(this.userService.send({ cmd: 'logout' }, data));
   }
 }

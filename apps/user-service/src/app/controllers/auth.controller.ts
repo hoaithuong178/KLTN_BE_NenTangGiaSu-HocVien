@@ -1,4 +1,4 @@
-import { Login, Register } from '@be/shared';
+import { Login, Logout, Register } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AuthService } from '../services/auth.service';
@@ -20,5 +20,10 @@ export class AuthController {
   @MessagePattern({ cmd: 'otp_register' })
   otpRegister(data: string) {
     return this.authService.otpRegister(data);
+  }
+
+  @MessagePattern({ cmd: 'logout' })
+  logout(data: Logout) {
+    return this.authService.logout(data);
   }
 }

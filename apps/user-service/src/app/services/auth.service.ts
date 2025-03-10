@@ -6,16 +6,21 @@ import {
   generateAccessToken,
   generateRefreshToken,
   JWTInput,
+  JWTResponse,
   Login,
+  Logout,
   Register,
+  verifyRefreshToken,
 } from '@be/shared';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import sendEmail from '../configs/email.config';
 import otp from '../configs/otp.config';
 import Redis from '../configs/redis.config';
+import { InvalidTokenRepository } from '../repositories/invalidToken.repository';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -24,6 +29,7 @@ export class AuthService {
 
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly invalidTokenRepository: InvalidTokenRepository,
     @Inject('EDUCATION_SERVICE') private readonly educationService: ClientProxy
   ) {}
 
@@ -32,13 +38,17 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role,
+      jwtId: randomUUID(),
     };
 
     const response: BaseResponse<AuthResponse> = {
       statusCode: HttpStatus.OK,
       data: {
         accessToken: generateAccessToken(userData),
-        refreshToken: generateRefreshToken(userData),
+        refreshToken: generateRefreshToken({
+          ...userData,
+          jwtId: randomUUID(),
+        }),
       },
     };
 
@@ -184,5 +194,37 @@ export class AuthService {
     };
 
     return response;
+  }
+
+  async logout(data: Logout) {
+    let refreshData: JWTResponse | null = null;
+
+    try {
+      refreshData = verifyRefreshToken(data.refreshToken) as JWTResponse;
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    try {
+      const queries = [this.invalidTokenRepository.createInvalidToken(data)];
+
+      if (refreshData) {
+        queries.push(
+          this.invalidTokenRepository.createInvalidToken({
+            expiredAt: new Date(refreshData.exp * 1000),
+            id: refreshData.jwtId,
+            refreshToken: data.refreshToken,
+          })
+        );
+      }
+
+      await Promise.all(queries);
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    return {
+      statusCode: HttpStatus.OK,
+    };
   }
 }

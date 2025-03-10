@@ -1,5 +1,15 @@
-import { Login, OTPRegister, Register } from '@be/shared';
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { AuthRequest, Login, OTPRegister, Register } from '@be/shared';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '../guards/auth.guard';
 import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
@@ -29,5 +39,25 @@ export class AuthController {
     this.logger.log(`Received request to register OTP ${JSON.stringify(data)}`);
 
     return await this.authService.otpRegister(data.email);
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Request() req: AuthRequest,
+    @Body('refreshToken') refreshToken: string
+  ) {
+    this.logger.log(
+      `Received request to logout ${JSON.stringify(
+        req.user
+      )} and refreshToken ${JSON.stringify(refreshToken)}`
+    );
+
+    return await this.authService.logout({
+      expiredAt: new Date(req.user.exp * 1000),
+      id: req.user.jwtId,
+      refreshToken,
+    });
   }
 }

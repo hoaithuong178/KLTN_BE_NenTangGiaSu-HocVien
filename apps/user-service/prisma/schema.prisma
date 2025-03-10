@@ -190,3 +190,11 @@ model Message {
 
   @@map("messages")
 }
+
+model InvalidToken {
+  id        String   @id
+  expiredAt DateTime @map("expired_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("invalid_tokens")
+}

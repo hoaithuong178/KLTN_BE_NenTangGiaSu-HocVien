@@ -11,6 +11,7 @@ import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { PrismaModule } from './prisma/prisma.module';
+import { InvalidTokenRepository } from './repositories/invalidToken.repository';
 import { TutorRepository } from './repositories/tutor.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserProfileRepository } from './repositories/userProfile.repository';
@@ -58,6 +59,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     TutorRepository,
     UserProfileService,
     UserProfileRepository,
+    InvalidTokenRepository,
   ],
 })
 export class AppModule {}
