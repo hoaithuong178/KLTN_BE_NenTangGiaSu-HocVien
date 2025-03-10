@@ -49,7 +49,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 
 @Module({
   imports: [
-    ClientsModule.register(registerServices('CHATBOT_EDUCATION')),
+    ClientsModule.register(registerServices('CHATBOT_EDUCATION', 'USER')),
     PrismaModule,
   ],
   controllers: [

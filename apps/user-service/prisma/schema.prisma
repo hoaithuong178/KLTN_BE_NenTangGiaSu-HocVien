@@ -140,6 +140,8 @@ enum NotificationType {
   NEW_UPDATE
   SYSTEM_MAINTENANCE
   PRICE_NEGOTIATION
+  TEACH_REQUEST
+  RECEIVE_CLASS
 }
 
 model Notification {
@@ -150,6 +152,7 @@ model Notification {
   createdAt   DateTime         @default(now()) @map("created_at")
   isRead      Boolean          @default(false) @map("is_read")
   type        NotificationType
+  link        String?
   deleted     Boolean          @default(false)
 
   @@map("notifications")

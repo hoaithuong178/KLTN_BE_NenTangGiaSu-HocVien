@@ -2,25 +2,46 @@ import { Request, RequestStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import {
   BaseResponse,
+  CreateNotificationRequest,
   CreateRequest,
   DeleteRequest,
   GetRequestById,
   UpdateRequest,
 } from '@be/shared';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { RequestRepository } from '../repositories/request.repository';
 
 @Injectable()
 export class RequestService {
   private readonly logger: Logger = new Logger(RequestService.name);
 
-  constructor(private readonly requestRepository: RequestRepository) {}
+  constructor(
+    private readonly requestRepository: RequestRepository,
+    @Inject('USER_SERVICE')
+    private readonly notificationClient: ClientProxy
+  ) {}
 
   async create(data: CreateRequest) {
     this.logger.log('Tạo yêu cầu với dữ liệu: ' + JSON.stringify(data));
 
     const createdRequest = await this.requestRepository.create(data);
+
+    const notification: CreateNotificationRequest = {
+      title:
+        data.type === 'RECEIVE_CLASS'
+          ? 'Yêu cầu dạy học mới'
+          : 'Yêu cầu học mới',
+      message:
+        data.type === 'RECEIVE_CLASS'
+          ? `Gia sư ${data.from.name} muốn đăng ký dạy lớp của bạn`
+          : `Học viên ${data.from.name} muốn đăng ký học với bạn`,
+      recipientId: data.to.id,
+      type: data.type === 'TEACH_REQUEST' ? 'TUTOR_REQUEST' : 'RECEIVE_CLASS',
+      link: createdRequest.id,
+    };
+
+    this.notificationClient.emit('create_notification', notification);
 
     const response: BaseResponse<Request> = {
       statusCode: HttpStatus.CREATED,
