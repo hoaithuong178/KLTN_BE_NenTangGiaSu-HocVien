@@ -1,0 +1,25 @@
+FROM node:18 AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npx prisma generate --schema=apps/education-service/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/transaction-service/prisma/schema.prisma
+RUN npx nx run shared:build --verbose
+RUN NX_DAEMON=false npx nx build transaction-service --verbose
+
+FROM node:18
+WORKDIR /app
+COPY --from=builder /app/dist/apps/transaction-service/ .
+RUN npm install --only=production
+
+COPY --from=builder /app/apps/user-service/prisma/schema.prisma ./prisma/user-schema.prisma
+COPY --from=builder /app/apps/education-service/prisma/schema.prisma ./prisma/education-schema.prisma
+COPY --from=builder /app/apps/transaction-service/prisma/schema.prisma ./prisma/transaction-schema.prisma
+RUN npx prisma generate --schema=./prisma/user-schema.prisma
+RUN npx prisma generate --schema=./prisma/education-schema.prisma
+RUN npx prisma generate --schema=./prisma/transaction-schema.prisma
+
+EXPOSE 4004
+CMD ["node", "main.js"]

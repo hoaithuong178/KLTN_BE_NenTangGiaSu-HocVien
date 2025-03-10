@@ -8,6 +8,6 @@ export class HealthController {
   health() {
     this.logger.log('Health check');
 
-    return 'Education service is up and running';
+    return 'Transaction service is up and running';
   }
 }
