@@ -26,4 +26,9 @@ export class AuthController {
   logout(data: Logout) {
     return this.authService.logout(data);
   }
+
+  @MessagePattern({ cmd: 'refresh_token' })
+  refreshToken(data: string) {
+    return this.authService.refreshToken(data);
+  }
 }

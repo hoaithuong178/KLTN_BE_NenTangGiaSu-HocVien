@@ -24,4 +24,10 @@ export class AuthService {
   logout(data: Logout) {
     return lastValueFrom(this.userService.send({ cmd: 'logout' }, data));
   }
+
+  refreshToken(refreshToken: string) {
+    return lastValueFrom(
+      this.userService.send({ cmd: 'refresh_token' }, refreshToken)
+    );
+  }
 }

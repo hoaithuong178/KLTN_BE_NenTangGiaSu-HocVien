@@ -227,4 +227,59 @@ export class AuthService {
       statusCode: HttpStatus.OK,
     };
   }
+
+  async refreshToken(refreshToken: string) {
+    this.logger.log('Refreshing token');
+
+    let refreshData: JWTResponse;
+
+    try {
+      refreshData = verifyRefreshToken(refreshToken) as JWTResponse;
+    } catch (error) {
+      this.logger.error(error);
+
+      throw new RpcException({
+        statusCode: 401,
+        message: 'Token không hợp lệ hoặc đã hết hạn',
+      });
+    }
+
+    const invalidToken = await this.invalidTokenRepository.getInvalidToken(
+      refreshData.jwtId
+    );
+
+    if (invalidToken) {
+      throw new RpcException({
+        statusCode: 401,
+        message: 'Token đã bị vô hiệu hóa',
+      });
+    }
+
+    const user = await this.userRepository.findUserById(refreshData.id);
+
+    if (!user) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Không tìm thấy người dùng',
+      });
+    }
+
+    if (user.status === UserStatus.BLOCKED) {
+      throw new RpcException({
+        statusCode: 401,
+        message: 'Tài khoản đã bị khóa',
+      });
+    }
+
+    this.invalidTokenRepository
+      .createInvalidToken({
+        expiredAt: new Date(refreshData.exp * 1000),
+        id: refreshData.jwtId,
+        refreshToken: refreshToken,
+      })
+      .then(() => this.logger.log('Add refresh to invalid token table'))
+      .catch((error) => this.logger.error(error));
+
+    return this.createAuthResponse(user);
+  }
 }
