@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
 import { ClassController } from './controllers/class.controller';
 import { ContractController } from './controllers/contract.controller';
+import { FavoritePostController } from './controllers/favoritePost.controller';
 import { PostController } from './controllers/post.controller';
 import { RequestController } from './controllers/request.controller';
 import { SubjectController } from './controllers/subject.controller';
@@ -20,6 +21,7 @@ import { UserProfileController } from './controllers/userProfile.controller';
 import { AuthService } from './services/auth.service';
 import { ClassService } from './services/class.service';
 import { ContractService } from './services/contract.service';
+import { FavoritePostService } from './services/favoritePost.service';
 import { PostService } from './services/post.service';
 import { RequestService } from './services/request.service';
 import { SubjectService } from './services/subject.service';
@@ -67,6 +69,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     SubjectController,
     RequestController,
     ClassController,
+    FavoritePostController,
   ],
   providers: [
     AuthService,
@@ -79,6 +82,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     SubjectService,
     RequestService,
     ClassService,
+    FavoritePostService,
   ],
 })
 export class AppModule {}

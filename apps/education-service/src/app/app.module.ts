@@ -7,6 +7,7 @@ import {
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClassController } from './controllers/class.controller';
+import { FavoritePostController } from './controllers/favoritePost.controller';
 import { PostController } from './controllers/post.controller';
 import { RequestController } from './controllers/request.controller';
 import { SubjectController } from './controllers/subject.controller';
@@ -14,12 +15,14 @@ import { TimeSlotController } from './controllers/timeSlot.controller';
 import { UserController } from './controllers/user.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { ClassRepository } from './repositories/class.repository';
+import { FavoritePostRepository } from './repositories/favoritePost.repository';
 import { PostRepository } from './repositories/post.repository';
 import { RequestRepository } from './repositories/request.repository';
 import { SubjectRepository } from './repositories/subject.repository';
 import { TimeSlotRepository } from './repositories/timeSlot.repository';
 import { UserRepository } from './repositories/user.repository';
 import { ClassService } from './services/class.service';
+import { FavoritePostService } from './services/favoritePost.service';
 import { PostService } from './services/post.service';
 import { RequestService } from './services/request.service';
 import { SubjectService } from './services/subject.service';
@@ -57,6 +60,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     SubjectController,
     RequestController,
     ClassController,
+    FavoritePostController,
   ],
   providers: [
     AppService,
@@ -72,6 +76,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     RequestRepository,
     ClassService,
     ClassRepository,
+    FavoritePostService,
+    FavoritePostRepository,
   ],
 })
 export class AppModule {

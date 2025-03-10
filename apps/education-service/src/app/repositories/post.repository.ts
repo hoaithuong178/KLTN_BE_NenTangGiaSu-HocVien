@@ -37,6 +37,12 @@ export class PostRepository {
     });
   }
 
+  findByIds(ids: string[]) {
+    return this.prismaService.post.findMany({
+      where: { id: { in: ids } },
+    });
+  }
+
   update(id: string, { user, ...data }: Partial<Post>) {
     return this.prismaService.post.update({
       where: {

@@ -302,3 +302,11 @@ type FeePerSession {
   price          Float
   adjustmentTime DateTime
 }
+
+model FavoritePost {
+  id     String @id @default(uuid()) @map("_id")
+  postId String
+  userId String
+
+  @@map("favorite_posts")
+}
