@@ -282,4 +282,9 @@ export class AuthService {
 
     return this.createAuthResponse(user);
   }
+
+  async checkInvalidToken(id: string) {
+    const invalidToken = await this.invalidTokenRepository.getInvalidToken(id);
+    return !!invalidToken;
+  }
 }

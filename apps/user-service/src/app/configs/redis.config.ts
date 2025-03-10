@@ -2,7 +2,7 @@ import { createClient, RedisClientType } from 'redis';
 
 class Redis {
   private static instance: Redis;
-  private client: RedisClientType;
+  private readonly client: RedisClientType;
 
   private constructor() {
     this.client = createClient({

@@ -1,12 +1,23 @@
 import { verifyToken } from '@be/shared';
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  private readonly logger = new Logger(AuthGuard.name);
+
+  constructor(
+    @Inject('USER_SERVICE') private readonly userService: ClientProxy
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
     const token = request.headers.authorization;
@@ -20,6 +31,24 @@ export class AuthGuard implements CanActivate {
     const decoded = verifyToken(authToken);
 
     if (typeof decoded === 'string') return false;
+
+    // Kiểm tra token có trong bảng invalid_tokens không
+    try {
+      const isInvalidToken = await lastValueFrom(
+        this.userService.send(
+          { cmd: 'check_invalid_token' },
+          {
+            id: decoded.jwtId,
+          }
+        )
+      );
+
+      if (isInvalidToken) return false;
+    } catch (error) {
+      this.logger.error(error);
+
+      return false;
+    }
 
     request.user = decoded;
 

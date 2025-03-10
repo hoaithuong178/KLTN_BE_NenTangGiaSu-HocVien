@@ -31,4 +31,9 @@ export class AuthController {
   refreshToken(data: string) {
     return this.authService.refreshToken(data);
   }
+
+  @MessagePattern({ cmd: 'check_invalid_token' })
+  checkInvalidToken(data: { id: string }) {
+    return this.authService.checkInvalidToken(data.id);
+  }
 }
