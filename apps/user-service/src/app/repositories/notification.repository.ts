@@ -23,4 +23,24 @@ export class NotificationRepository {
       },
     });
   }
+
+  findById(id: string) {
+    return this.prismaService.notification.findUnique({
+      where: { id },
+    });
+  }
+
+  markAsRead(id: string) {
+    return this.prismaService.notification.update({
+      where: { id },
+      data: { isRead: true },
+    });
+  }
+
+  deleteNotification(id: string) {
+    return this.prismaService.notification.update({
+      where: { id },
+      data: { deleted: true },
+    });
+  }
 }

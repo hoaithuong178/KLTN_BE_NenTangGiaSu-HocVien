@@ -16,4 +16,19 @@ export class NotificationService {
       )
     );
   }
+
+  markAsRead(id: string, recipientId: string) {
+    return lastValueFrom(
+      this.userService.send(
+        { cmd: 'mark_notification_as_read' },
+        { id, recipientId }
+      )
+    );
+  }
+
+  deleteNotification(id: string, recipientId: string) {
+    return lastValueFrom(
+      this.userService.send({ cmd: 'delete_notification' }, { id, recipientId })
+    );
+  }
 }
