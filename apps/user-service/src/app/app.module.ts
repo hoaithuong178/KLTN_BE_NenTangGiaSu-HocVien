@@ -4,6 +4,7 @@ import {
   ClientsModuleOptions,
   Transport,
 } from '@nestjs/microservices';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
@@ -16,6 +17,7 @@ import { TutorRepository } from './repositories/tutor.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserProfileRepository } from './repositories/userProfile.repository';
 import { AuthService } from './services/auth.service';
+import { CleanupTokenService } from './services/cleanupToken.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/userProfile.service';
@@ -42,6 +44,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
   imports: [
     ClientsModule.register(registerServices('EDUCATION', 'CHATBOT_USER')),
     PrismaModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     AppController,
@@ -60,6 +63,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     UserProfileService,
     UserProfileRepository,
     InvalidTokenRepository,
+    CleanupTokenService,
   ],
 })
 export class AppModule {}

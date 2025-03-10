@@ -20,4 +20,14 @@ export class InvalidTokenRepository {
       where: { id },
     });
   }
+
+  deleteExpiredInvalidTokens() {
+    return this.prismaService.invalidToken.deleteMany({
+      where: {
+        expiredAt: {
+          lt: new Date(),
+        },
+      },
+    });
+  }
 }
