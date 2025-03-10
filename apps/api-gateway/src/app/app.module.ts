@@ -11,6 +11,7 @@ import { AuthController } from './controllers/auth.controller';
 import { ClassController } from './controllers/class.controller';
 import { ContractController } from './controllers/contract.controller';
 import { FavoritePostController } from './controllers/favoritePost.controller';
+import { PaymentController } from './controllers/payment.controller';
 import { PostController } from './controllers/post.controller';
 import { RequestController } from './controllers/request.controller';
 import { SubjectController } from './controllers/subject.controller';
@@ -22,6 +23,7 @@ import { AuthService } from './services/auth.service';
 import { ClassService } from './services/class.service';
 import { ContractService } from './services/contract.service';
 import { FavoritePostService } from './services/favoritePost.service';
+import { PaymentService } from './services/payment.service';
 import { PostService } from './services/post.service';
 import { RequestService } from './services/request.service';
 import { SubjectService } from './services/subject.service';
@@ -70,6 +72,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     RequestController,
     ClassController,
     FavoritePostController,
+    PaymentController,
   ],
   providers: [
     AuthService,
@@ -83,6 +86,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     RequestService,
     ClassService,
     FavoritePostService,
+    PaymentService,
   ],
 })
 export class AppModule {}
