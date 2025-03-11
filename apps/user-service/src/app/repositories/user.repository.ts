@@ -26,6 +26,13 @@ export class UserRepository {
   findUserById(id: string) {
     return this.prismaService.user.findUnique({
       where: { id },
+      include: {
+        userProfiles: {
+          select: {
+            avatar: true,
+          },
+        },
+      },
     });
   }
 

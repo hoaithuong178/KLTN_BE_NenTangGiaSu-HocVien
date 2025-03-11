@@ -1,5 +1,5 @@
 import { User, UserStatus } from '.prisma/user-service';
-import { BaseResponse } from '@be/shared';
+import { BaseResponse, UserWithAvatar } from '@be/shared';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
@@ -12,14 +12,25 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) {}
 
+  private toUserWithAvatar<T extends { userProfiles: { avatar: string }[] }>(
+    user: T
+  ) {
+    const { userProfiles, ...restData } = user;
+
+    return {
+      ...restData,
+      avatar: userProfiles?.[0]?.avatar ?? null,
+    };
+  }
+
   async getMe(id: string) {
     this.logger.log(`Getting user with id: ${id}`);
 
     const user = await this.userRepository.findUserById(id);
 
-    const response: BaseResponse<User> = {
+    const response: BaseResponse<UserWithAvatar> = {
       statusCode: HttpStatus.OK,
-      data: user,
+      data: this.toUserWithAvatar(user),
     };
 
     return response;
@@ -85,9 +96,9 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.userRepository.findUserById(id);
 
-    const response: BaseResponse<User> = {
+    const response: BaseResponse<UserWithAvatar> = {
       statusCode: HttpStatus.OK,
-      data: user,
+      data: this.toUserWithAvatar(user),
     };
 
     return response;

@@ -1,4 +1,4 @@
-import { Role } from '.prisma/user-service';
+import { Role, User } from '.prisma/user-service';
 import { IsEmail, IsIn, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateUser {
@@ -66,4 +66,8 @@ export type UserBase = {
   id: string;
   name?: string;
   avatar?: string;
+};
+
+export type UserWithAvatar = User & {
+  avatar: string | null;
 };

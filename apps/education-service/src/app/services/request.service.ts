@@ -133,42 +133,61 @@ export class RequestService {
     }
   }
 
-  async updateStatus({
-    id,
-    userId,
-    status,
-    feePerSession,
-  }: {
-    id: string;
-    userId: string;
-    status: RequestStatus;
-    feePerSession?: number;
-  }) {
-    const request = await this.requestRepository.findById(id);
+  private sendNotification(request: Request) {
+    const status = request.status;
 
-    if (!request) {
-      throw new RpcException('Yêu cầu không tồn tại');
+    const notification: CreateNotificationRequest = {
+      title: '',
+      message: '',
+      recipientId:
+        status === RequestStatus.CANCELLED ? request.to.id : request.from.id,
+      type:
+        request.type === 'TEACH_REQUEST' ? 'TUTOR_REQUEST' : 'RECEIVE_CLASS',
+      link: request.id,
+    };
+
+    switch (status) {
+      case RequestStatus.ACCEPTED:
+        notification.title = 'Yêu cầu đã được chấp nhận';
+        notification.message =
+          request.type === 'TEACH_REQUEST'
+            ? `Gia sư ${request.to.name} đã chấp nhận yêu cầu dạy học của bạn`
+            : `Học viên ${request.to.name} đã chấp nhận yêu cầu học của bạn`;
+        break;
+      case RequestStatus.REJECTED:
+        notification.title = 'Yêu cầu đã bị từ chối';
+        notification.message =
+          request.type === 'TEACH_REQUEST'
+            ? `Gia sư ${request.to.name} đã từ chối yêu cầu dạy học của bạn`
+            : `Học viên ${request.to.name} đã từ chối yêu cầu học của bạn`;
+        break;
+      case RequestStatus.CANCELLED:
+        notification.title = 'Yêu cầu đã bị hủy';
+        notification.message =
+          request.type === 'TEACH_REQUEST'
+            ? `Học viên ${request.from.name} đã hủy yêu cầu dạy học`
+            : `Gia sư ${request.from.name} đã hủy yêu cầu học`;
+        break;
+      case RequestStatus.PRICE_NEGOTIATION:
+        notification.title = 'Đề xuất học phí mới';
+        notification.message = `Học phí mới được đề xuất: ${
+          request.feePerSessions.at(-1)?.price
+        } VNĐ/buổi`;
+        break;
     }
 
-    if (request.status === RequestStatus.CANCELLED) {
-      throw new RpcException('Yêu cầu đã bị hủy');
-    }
+    this.notificationClient.emit('create_notification', notification);
+  }
 
-    if (request.status === RequestStatus.ACCEPTED) {
-      throw new RpcException('Yêu cầu đã được chấp nhận');
-    }
-
-    if (
-      request.status === RequestStatus.REJECTED &&
-      status !== RequestStatus.PRICE_NEGOTIATION
-    ) {
-      throw new RpcException('Yêu cầu đã bị từ chối');
-    }
-
+  private validatePermission(
+    request: Request,
+    status: RequestStatus,
+    userId: string,
+    feePerSession?: number
+  ) {
     const fromId =
       request.feePerSessions.length % 2 === 0 ? request.from.id : request.to.id;
 
-    // Kiểm tra quyền cập nhật status
     switch (status) {
       case 'ACCEPTED':
       case 'REJECTED':
@@ -192,12 +211,68 @@ export class RequestService {
       default:
         throw new RpcException('Trạng thái không hợp lệ');
     }
+  }
+
+  private validateStatus({
+    request,
+    status,
+    feePerSession,
+    userId,
+  }: {
+    request: Request;
+    status: RequestStatus;
+    feePerSession?: number;
+    userId: string;
+  }) {
+    if (!request) {
+      throw new RpcException('Yêu cầu không tồn tại');
+    }
+
+    if (request.status === RequestStatus.CANCELLED) {
+      throw new RpcException('Yêu cầu đã bị hủy');
+    }
+
+    if (request.status === RequestStatus.ACCEPTED) {
+      throw new RpcException('Yêu cầu đã được chấp nhận');
+    }
+
+    if (
+      request.status === RequestStatus.REJECTED &&
+      status !== RequestStatus.PRICE_NEGOTIATION
+    ) {
+      throw new RpcException('Yêu cầu đã bị từ chối');
+    }
+
+    this.validatePermission(request, status, userId, feePerSession);
+  }
+
+  async updateStatus({
+    id,
+    userId,
+    status,
+    feePerSession,
+  }: {
+    id: string;
+    userId: string;
+    status: RequestStatus;
+    feePerSession?: number;
+  }) {
+    const request = await this.requestRepository.findById(id);
+
+    this.validateStatus({
+      request,
+      status,
+      feePerSession,
+      userId,
+    });
 
     const updatedRequest = await this.requestRepository.updateStatus(
       id,
       status,
       feePerSession
     );
+
+    this.sendNotification(updatedRequest);
 
     const response: BaseResponse<Request> = {
       statusCode: HttpStatus.OK,
@@ -207,7 +282,9 @@ export class RequestService {
   }
 
   async delete({ id, userId, role }: DeleteRequest) {
-    this.logger.log('Xóa yêu cầu với ID: ' + { id, userId, role });
+    this.logger.log(
+      'Xóa yêu cầu với ID: ' + JSON.stringify({ id, userId, role })
+    );
     const deletedRequest = await (role === Role.ADMIN
       ? this.requestRepository.delete(id)
       : this.requestRepository.deleteByFromUserId(id, userId));

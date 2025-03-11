@@ -46,25 +46,26 @@ export class RequestController {
   ) {
     this.logger.log(`Create request with data: ${JSON.stringify(data)}`);
 
-    const user = await this.userService.getUserById(req.user.id);
-    this.logger.log(`User: ${JSON.stringify(user)}`);
+    const [user, to, subject] = await Promise.all([
+      this.userService.getUserById(req.user.id),
+      this.userService.getUserById(toId),
+      this.subjectService.findById(subjectId),
+    ]);
 
     if (!user) {
       throw new RpcException('User not found');
     }
 
-    const to = await this.userService.getUserById(toId);
-    this.logger.log(`To: ${JSON.stringify(to)}`);
-
     if (!to) {
       throw new RpcException('User not found');
     }
 
-    const subject = await this.subjectService.findById(subjectId);
-    this.logger.log(`Subject: ${JSON.stringify(subject)}`);
-
     if (!subject) {
       throw new RpcException('Subject not found');
+    }
+
+    if (user.data.role === Role.TUTOR && data.type === 'TEACH_REQUEST') {
+      throw new RpcException('Only student can create teach request');
     }
 
     return this.requestService.create({
