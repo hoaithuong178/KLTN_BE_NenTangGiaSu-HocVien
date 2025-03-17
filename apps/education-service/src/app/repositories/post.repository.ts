@@ -12,10 +12,6 @@ export class PostRepository {
       data: {
         ...data,
         postTime: new Date(data.postTime),
-        schedule: data.schedule.map((s) => ({
-          startTime: new Date(s.startTime),
-          endTime: new Date(s.endTime),
-        })),
         user: {
           set: data.user,
         },
@@ -56,10 +52,6 @@ export class PostRepository {
       data: {
         ...data,
         postTime: data.postTime ? new Date(data.postTime) : undefined,
-        schedule: data.schedule?.map((s) => ({
-          startTime: new Date(s.startTime),
-          endTime: new Date(s.endTime),
-        })),
       },
     });
   }
