@@ -244,7 +244,7 @@ model Post {
   sessionPerWeek Int          @map("session_per_week")
   duration       Int          @map("duration")
   subject        SubjectClass @map("subject")
-  schedule       Schedule[]   @map("schedule")
+  schedule       String[]     @default([]) @map("schedule")
   requirements   String[]     @default([]) @map("requirements")
   mode           Boolean      @map("mode")
   feePerSession  Float        @map("fee_per_session")

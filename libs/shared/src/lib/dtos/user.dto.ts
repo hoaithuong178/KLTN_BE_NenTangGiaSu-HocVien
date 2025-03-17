@@ -8,7 +8,7 @@ export class CreateUser {
   @IsNotEmpty({
     message: 'name: Họ tên không được để trống',
   })
-  @Matches(/^[a-zA-Z\s]+$/, {
+  @Matches(/^[\p{L}\s]+$/u, {
     message: 'name: Họ tên chỉ được chứa chữ cái và khoảng trắng',
   })
   name!: string;
@@ -19,7 +19,7 @@ export class CreateUser {
   @IsNotEmpty({
     message: 'phone: Số điện thoại không được để trống',
   })
-  @Matches(/^[0-9]{10}$/, {
+  @Matches(/^\d{10}$/, {
     message: 'phone: Số điện thoại phải có 10 chữ số',
   })
   phone!: string;

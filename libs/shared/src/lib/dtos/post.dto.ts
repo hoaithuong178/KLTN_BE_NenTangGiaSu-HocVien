@@ -1,6 +1,5 @@
 import { Grade, UserPost } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
-import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -9,31 +8,7 @@ import {
   IsNumber,
   IsString,
   Min,
-  ValidateNested,
 } from 'class-validator';
-export class Schedule {
-  @IsDateString(
-    {},
-    {
-      message: 'startTime: Thời gian bắt đầu không đúng định dạng',
-    }
-  )
-  @IsNotEmpty({
-    message: 'startTime: Thời gian bắt đầu không được để trống',
-  })
-  startTime!: string;
-
-  @IsDateString(
-    {},
-    {
-      message: 'endTime: Thời gian kết thúc không đúng định dạng',
-    }
-  )
-  @IsNotEmpty({
-    message: 'endTime: Thời gian kết thúc không được để trống',
-  })
-  endTime!: string;
-}
 
 export class CreatePostRequest {
   @IsString({
@@ -66,12 +41,10 @@ export class CreatePostRequest {
   @IsArray({
     message: 'schedule: Lịch học phải là một mảng',
   })
-  @ValidateNested({ each: true })
-  @Type(() => Schedule)
   @IsNotEmpty({
     message: 'schedule: Lịch học không được để trống',
   })
-  schedule!: Schedule[];
+  schedule!: string[];
 
   @IsNotEmpty({
     message: 'grade: Khối lớp không được để trống',

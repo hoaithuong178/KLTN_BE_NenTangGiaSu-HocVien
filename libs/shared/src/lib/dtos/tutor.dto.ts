@@ -129,6 +129,26 @@ export class CreateTutorReq {
     message: 'description: Mô tả không được để trống',
   })
   description!: string;
+
+  @IsArray({
+    message: 'freeTime: Thời gian rảnh phải là một mảng',
+  })
+  @ArrayNotEmpty({
+    message: 'freeTime: Thời gian rảnh không được để trống',
+  })
+  @IsString({
+    each: true,
+    message: 'freeTime: Mỗi thời gian rảnh phải là chuỗi ký tự',
+  })
+  freeTime!: string[];
+
+  @IsString({
+    message: 'qualification: Bằng cấp phải là chuỗi ký tự',
+  })
+  @IsNotEmpty({
+    message: 'qualification: Bằng cấp không được để trống',
+  })
+  qualification!: string;
 }
 
 export class CreateTutor extends CreateTutorReq {
