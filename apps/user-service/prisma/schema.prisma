@@ -159,7 +159,7 @@ model Notification {
 }
 
 model Conversation {
-  id              String    @id @default(cuid())
+  id              String    @id
   tutorId         String
   studentId       String
   lastMessageTime DateTime  @map("last_message_time")
@@ -171,7 +171,7 @@ model Conversation {
 }
 
 model Media {
-  id        String  @id @default(cuid())
+  id        String  @id
   url       String
   type      String
   size      Int
@@ -182,7 +182,7 @@ model Media {
 }
 
 model Message {
-  id             String       @id @default(cuid())
+  id             String       @id
   senderId       String
   conversationId String
   message        String

@@ -27,7 +27,7 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [RABBIT_MQ_URL],
-        queue: 'user_queue',
+        queue: 'chat_queue',
         queueOptions: { durable: false },
       },
     }

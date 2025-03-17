@@ -8,17 +8,22 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
+import { ChatController } from './controllers/chat.controller';
 import { NotificationController } from './controllers/notification.controller';
 import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
+import { ChatGateway } from './gateways/chat.gateway';
 import { PrismaModule } from './prisma/prisma.module';
+import { ConversationRepository } from './repositories/conversation.repository';
 import { InvalidTokenRepository } from './repositories/invalidToken.repository';
+import { MessageRepository } from './repositories/message.repository';
 import { NotificationRepository } from './repositories/notification.repository';
 import { TutorRepository } from './repositories/tutor.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserProfileRepository } from './repositories/userProfile.repository';
 import { AuthService } from './services/auth.service';
+import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
 import { NotificationService } from './services/notification.service';
 import { TutorService } from './services/tutor.service';
@@ -45,7 +50,9 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 
 @Module({
   imports: [
-    ClientsModule.register(registerServices('EDUCATION', 'CHATBOT_USER')),
+    ClientsModule.register(
+      registerServices('EDUCATION', 'CHATBOT_USER', 'CHAT')
+    ),
     PrismaModule,
     ScheduleModule.forRoot(),
   ],
@@ -56,6 +63,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     TutorController,
     UserProfileController,
     NotificationController,
+    ChatController,
   ],
   providers: [
     AppService,
@@ -70,6 +78,10 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     CleanupTokenService,
     NotificationService,
     NotificationRepository,
+    ChatGateway,
+    ChatService,
+    ConversationRepository,
+    MessageRepository,
   ],
 })
 export class AppModule {}

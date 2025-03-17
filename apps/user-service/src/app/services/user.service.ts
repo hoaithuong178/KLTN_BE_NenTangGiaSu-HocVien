@@ -137,4 +137,10 @@ export class UserService {
 
     return response;
   }
+
+  async updateOnlineStatus(userId: string, isOnline: boolean) {
+    this.logger.log(`Updating online status for user: ${userId} - ${isOnline}`);
+
+    return this.userRepository.updateOnlineStatus(userId, isOnline);
+  }
 }

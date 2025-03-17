@@ -69,4 +69,14 @@ export class UserRepository {
       data: { status },
     });
   }
+
+  updateOnlineStatus(id: string, isOnline: boolean) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: {
+        isOnline,
+        lastActive: new Date(),
+      },
+    });
+  }
 }
