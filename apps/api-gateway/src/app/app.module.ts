@@ -35,6 +35,10 @@ import { TimeSlotService } from './services/timeSlot.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/userProfile.service';
+import { ClassPatternController } from './controllers/classPattern.controller';
+import { LessonPatternController } from './controllers/lessonPattern.controller';
+import { ClassPatternService } from './services/classPattern.service';
+import { LessonPatternService } from './services/lessonPattern.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
 
@@ -79,6 +83,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     PaymentController,
     NotificationController,
     ChatController,
+    ClassPatternController,
+    LessonPatternController,
   ],
   providers: [
     AuthService,
@@ -95,6 +101,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     PaymentService,
     NotificationService,
     ChatService,
+    ClassPatternService,
+    LessonPatternService,
   ],
 })
 export class AppModule {}

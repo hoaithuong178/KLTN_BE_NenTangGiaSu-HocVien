@@ -26,33 +26,34 @@ enum UserStatus {
 }
 
 model User {
-  id             String       @id @map("_id")
-  email          String       @unique
+  id             String         @id @map("_id")
+  email          String         @unique
   name           String
-  avatar         String       @default("")
-  phone          String       @unique
+  avatar         String         @default("")
+  phone          String         @unique
   password       String
   role           Role
-  status         UserStatus   @default(ACTIVE)
-  isOnline       Boolean      @default(false) @map("is_online")
-  lastActive     DateTime?    @map("last_active")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  createdBy      String?      @map("created_by")
-  updatedBy      String?      @map("updated_by")
-  lovedPosts     String[]     @default([]) @map("loved_posts")
-  lovedTutors    String[]     @default([]) @map("loved_tutors")
-  createdByUser  User?        @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  updatedByUser  User?        @relation("UpdatedBy", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  createdUsers   User[]       @relation("CreatedBy")
-  updatedUsers   User[]       @relation("UpdatedBy")
+  status         UserStatus     @default(ACTIVE)
+  isOnline       Boolean        @default(false) @map("is_online")
+  lastActive     DateTime?      @map("last_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  createdBy      String?        @map("created_by")
+  updatedBy      String?        @map("updated_by")
+  lovedPosts     String[]       @default([]) @map("loved_posts")
+  lovedTutors    String[]       @default([]) @map("loved_tutors")
+  createdByUser  User?          @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  updatedByUser  User?          @relation("UpdatedBy", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdUsers   User[]         @relation("CreatedBy")
+  updatedUsers   User[]         @relation("UpdatedBy")
   timeSlots      TimeSlot[]
-  studentClasses Class[]      @relation("student")
-  tutorClasses   Class[]      @relation("tutor")
-  studentRatings Rating[]     @relation("student")
-  tutorRatings   Rating[]     @relation("tutor")
+  studentClasses Class[]        @relation("student")
+  tutorClasses   Class[]        @relation("tutor")
+  studentRatings Rating[]       @relation("student")
+  tutorRatings   Rating[]       @relation("tutor")
   complaints     Complaint[]
   submissions    Submission[]
+  classPatterns  ClassPattern[]
 
   @@map("users")
 }
@@ -309,4 +310,27 @@ model FavoritePost {
   userId String
 
   @@map("favorite_posts")
+}
+
+model ClassPattern {
+  id      String          @id @default(uuid()) @map("_id")
+  tutorId String          @map("tutor_id")
+  grade   Grade           @map("grade")
+  subject String          @map("subject")
+  tutor   User            @relation(fields: [tutorId], references: [id])
+  lessons LessonPattern[]
+
+  @@map("class_patterns")
+}
+
+model LessonPattern {
+  id        String       @id @default(uuid()) @map("_id")
+  classId   String       @map("class_id")
+  startTime DateTime     @map("start_time")
+  endTime   DateTime     @map("end_time")
+  content   String
+  location  String
+  class     ClassPattern @relation(fields: [classId], references: [id])
+
+  @@map("lesson_patterns")
 }
