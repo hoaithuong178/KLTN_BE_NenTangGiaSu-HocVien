@@ -8,32 +8,36 @@ import Redis from './app/configs/redis.config';
 import { TUTOR_INDEX } from './app/constants/elasticsearch.const';
 import { HealthModule } from './app/health/health.module';
 
+const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
+
+if (!RABBIT_MQ_URL) {
+  throw new Error('RABBIT_MQ_URL is not defined');
+}
+
 dotenv.config();
+
+const createConnect = (queue: string): MicroserviceOptions => {
+  return {
+    transport: Transport.RMQ,
+    options: {
+      urls: [RABBIT_MQ_URL],
+      queue: queue,
+      queueOptions: { durable: false },
+    },
+  };
+};
 
 async function bootstrap() {
   const logger = new Logger('UserService');
 
   logger.log('Starting user service...');
 
-  const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
+  const app = await NestFactory.create(AppModule);
 
-  if (!RABBIT_MQ_URL) {
-    throw new Error('RABBIT_MQ_URL is not defined');
-  }
+  app.connectMicroservice<MicroserviceOptions>(createConnect('user_queue'));
+  app.connectMicroservice<MicroserviceOptions>(createConnect('chat_queue'));
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.RMQ,
-      options: {
-        urls: [RABBIT_MQ_URL],
-        queue: 'chat_queue',
-        queueOptions: { durable: false },
-      },
-    }
-  );
-
-  await app.listen();
+  await app.startAllMicroservices();
 
   await Redis.getInstance().getClient().connect();
   logger.log('Connected to Redis');

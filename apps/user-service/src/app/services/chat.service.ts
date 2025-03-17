@@ -1,5 +1,6 @@
 import { CreateMessageDto } from '@be/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { getReceiverId } from '../../utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationRepository } from '../repositories/conversation.repository';
@@ -44,5 +45,20 @@ export class ChatService {
     this.logger.log(`Getting conversation messages: ${conversationId}`);
 
     return this.messageRepo.findByConversationId(conversationId);
+  }
+
+  async getUserConversations(userId: string) {
+    this.logger.log(`Getting user conversations: ${userId}`);
+
+    try {
+      const conversations = await this.conversationRepo.findByUserId(userId);
+
+      return {
+        statusCode: 200,
+        data: conversations,
+      };
+    } catch (error) {
+      throw new RpcException(error.message);
+    }
   }
 }

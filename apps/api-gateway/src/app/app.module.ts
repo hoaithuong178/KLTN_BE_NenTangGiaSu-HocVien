@@ -8,6 +8,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
+import { ChatController } from './controllers/chat.controller';
 import { ClassController } from './controllers/class.controller';
 import { ContractController } from './controllers/contract.controller';
 import { FavoritePostController } from './controllers/favoritePost.controller';
@@ -21,6 +22,7 @@ import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { AuthService } from './services/auth.service';
+import { ChatService } from './services/chat.service';
 import { ClassService } from './services/class.service';
 import { ContractService } from './services/contract.service';
 import { FavoritePostService } from './services/favoritePost.service';
@@ -76,6 +78,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     FavoritePostController,
     PaymentController,
     NotificationController,
+    ChatController,
   ],
   providers: [
     AuthService,
@@ -91,6 +94,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     FavoritePostService,
     PaymentService,
     NotificationService,
+    ChatService,
   ],
 })
 export class AppModule {}

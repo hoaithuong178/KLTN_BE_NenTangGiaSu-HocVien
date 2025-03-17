@@ -16,4 +16,9 @@ export class ChatController {
   getConversationMessages(conversationId: string) {
     return this.chatService.getConversationMessages(conversationId);
   }
+
+  @MessagePattern({ cmd: 'get_user_conversations' })
+  getUserConversations(userId: string) {
+    return this.chatService.getUserConversations(userId);
+  }
 }

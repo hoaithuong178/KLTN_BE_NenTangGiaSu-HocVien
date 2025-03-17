@@ -27,4 +27,49 @@ export class ConversationRepository {
       where: { id },
     });
   }
+
+  findByUserId(userId: string) {
+    return this.prismaService.conversation.findMany({
+      where: {
+        OR: [{ tutorId: userId }, { studentId: userId }],
+      },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            name: true,
+            isOnline: true,
+            lastActive: true,
+            userProfiles: {
+              select: {
+                avatar: true,
+              },
+            },
+          },
+        },
+        student: {
+          select: {
+            id: true,
+            name: true,
+            isOnline: true,
+            lastActive: true,
+            userProfiles: {
+              select: {
+                avatar: true,
+              },
+            },
+          },
+        },
+        messages: {
+          orderBy: {
+            sentAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        lastMessageTime: 'desc',
+      },
+    });
+  }
 }
