@@ -56,4 +56,15 @@ export class UserProfileController {
 
     return result;
   }
+
+  @MessagePattern({ cmd: 'update_wallet_address' })
+  async updateWalletAddress({
+    userId,
+    walletAddress,
+  }: {
+    userId: string;
+    walletAddress: string;
+  }) {
+    return this.userProfileService.updateWalletAddress(userId, walletAddress);
+  }
 }

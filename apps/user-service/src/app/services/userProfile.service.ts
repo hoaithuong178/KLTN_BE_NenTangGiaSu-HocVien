@@ -174,4 +174,32 @@ export class UserProfileService {
       });
     }
   }
+
+  async updateWalletAddress(id: string, walletAddress: string) {
+    const userProfile = await this.UserProfileRepository.getUserProfileById(id);
+
+    if (!userProfile) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Hồ sơ người dùng không tồn tại',
+      });
+    }
+
+    if (userProfile.walletAddress) {
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Người dùng đã có địa chỉ ví',
+      });
+    }
+
+    const updatedUserProfile =
+      await this.UserProfileRepository.updateWalletAddress(id, walletAddress);
+
+    const response: BaseResponse<UserProfile> = {
+      statusCode: HttpStatus.OK,
+      data: updatedUserProfile,
+    };
+
+    return response;
+  }
 }

@@ -1,10 +1,12 @@
 import { CreateUserProfile, UpdateUserProfile } from '@be/shared';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class UserProfileService {
+  private readonly logger = new Logger(UserProfileService.name);
+
   constructor(@Inject('USER_SERVICE') private readonly service: ClientProxy) {}
 
   create(data: CreateUserProfile) {
@@ -25,5 +27,16 @@ export class UserProfileService {
 
   delete(id: string) {
     return lastValueFrom(this.service.send({ cmd: 'delete_user_profile' }, id));
+  }
+
+  async updateWalletAddress(userId: string, walletAddress: string) {
+    this.logger.log(`Cập nhật địa chỉ ví cho người dùng ${userId}`);
+
+    return lastValueFrom(
+      this.service.send(
+        { cmd: 'update_wallet_address' },
+        { userId, walletAddress }
+      )
+    );
   }
 }

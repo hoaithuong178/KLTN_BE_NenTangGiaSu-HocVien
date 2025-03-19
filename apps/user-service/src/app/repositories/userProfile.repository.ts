@@ -63,4 +63,11 @@ export class UserProfileRepository {
       },
     });
   }
+
+  updateWalletAddress(id: string, walletAddress: string) {
+    return this.prismaService.userProfile.update({
+      where: { id },
+      data: { walletAddress },
+    });
+  }
 }

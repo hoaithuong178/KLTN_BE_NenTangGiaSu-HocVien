@@ -78,4 +78,19 @@ export class UserProfileController {
     this.logger.log(`Get user profile for user ${req.user.id}`);
     return this.userProfileService.get(req.user.id);
   }
+
+  @Patch('wallet-address')
+  @UseGuards(AuthGuard)
+  async updateWalletAddress(
+    @Request() req: AuthRequest,
+    @Body() data: { walletAddress: string }
+  ) {
+    this.logger.log(
+      `Cập nhật địa chỉ ví cho người dùng ${req.user.id} với địa chỉ ${data.walletAddress}`
+    );
+    return this.userProfileService.updateWalletAddress(
+      req.user.id,
+      data.walletAddress
+    );
+  }
 }

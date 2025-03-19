@@ -66,6 +66,7 @@ model UserProfile {
   address       String?
   dob           DateTime
   gender        Gender
+  walletAddress String?   @map("wallet_address")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   createdBy     String?   @map("created_by")
