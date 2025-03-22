@@ -1,5 +1,5 @@
 import { User, UserStatus } from '.prisma/user-service';
-import { BaseResponse, UserWithAvatar } from '@be/shared';
+import { BaseResponse, CreateUserWithGoogle, UserWithAvatar } from '@be/shared';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
@@ -142,5 +142,17 @@ export class UserService {
     this.logger.log(`Updating online status for user: ${userId} - ${isOnline}`);
 
     return this.userRepository.updateOnlineStatus(userId, isOnline);
+  }
+
+  async findUserByEmail(email: string) {
+    this.logger.log(`Finding user by email: ${email}`);
+
+    return this.userRepository.findUserByEmail(email);
+  }
+
+  async createWithGoogle(data: CreateUserWithGoogle) {
+    this.logger.log(`Creating user with Google: ${data.email}`);
+
+    return this.userRepository.createWithGoogle(data);
   }
 }

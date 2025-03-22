@@ -1,5 +1,5 @@
 import { UserStatus } from '.prisma/user-service';
-import { CreateUser } from '@be/shared';
+import { CreateUser, CreateUserWithGoogle } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -18,7 +18,7 @@ export class UserRepository {
   }
 
   findUserByPhone(phone: string) {
-    return this.prismaService.user.findUnique({
+    return this.prismaService.user.findFirst({
       where: { phone },
     });
   }
@@ -78,5 +78,9 @@ export class UserRepository {
         lastActive: new Date(),
       },
     });
+  }
+
+  createWithGoogle(data: CreateUserWithGoogle) {
+    return this.prismaService.user.create({ data });
   }
 }

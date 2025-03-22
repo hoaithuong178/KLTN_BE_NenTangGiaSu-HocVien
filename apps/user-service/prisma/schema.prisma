@@ -25,16 +25,23 @@ enum UserStatus {
   BLOCKED
 }
 
+enum AuthProvider {
+  GOOGLE
+  EMAIL
+  FACEBOOK
+}
+
 model User {
   id                   String         @id @default(cuid())
   email                String         @unique
   name                 String
-  phone                String         @unique
+  phone                String?
   password             String
   role                 Role
   status               UserStatus     @default(ACTIVE)
   isOnline             Boolean        @default(false) @map("is_online")
   lastActive           DateTime?      @map("last_active")
+  authProvider         AuthProvider   @default(EMAIL)
   createdAt            DateTime       @default(now()) @map("created_at")
   updatedAt            DateTime       @updatedAt @map("updated_at")
   createdBy            String?        @map("created_by")

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import {
   ClientsModule,
   ClientsModuleOptions,
@@ -9,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
 import { ChatController } from './controllers/chat.controller';
+import { GoogleAuthController } from './controllers/googleAuth.controller';
 import { NotificationController } from './controllers/notification.controller';
 import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
@@ -25,6 +27,7 @@ import { UserProfileRepository } from './repositories/userProfile.repository';
 import { AuthService } from './services/auth.service';
 import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
+import { GoogleAuthService } from './services/googleAuth.service';
 import { NotificationService } from './services/notification.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
@@ -55,6 +58,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ),
     PrismaModule,
     ScheduleModule.forRoot(),
+    ConfigModule.forRoot(),
   ],
   controllers: [
     AppController,
@@ -64,6 +68,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     UserProfileController,
     NotificationController,
     ChatController,
+    GoogleAuthController,
   ],
   providers: [
     AppService,
@@ -82,6 +87,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ChatService,
     ConversationRepository,
     MessageRepository,
+    GoogleAuthService,
   ],
 })
 export class AppModule {}

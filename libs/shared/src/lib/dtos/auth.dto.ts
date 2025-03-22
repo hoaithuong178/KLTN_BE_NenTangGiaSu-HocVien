@@ -1,3 +1,4 @@
+import { AuthProvider, Role } from '.prisma/user-service';
 import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { CreateUser } from './user.dto';
 
@@ -81,4 +82,18 @@ export class Logout {
   id!: string;
   expiredAt!: Date;
   refreshToken!: string;
+}
+
+export class GoogleTokenVerificationDto {
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+}
+
+export class CreateUserWithGoogle {
+  email!: string;
+  name!: string;
+  password!: string;
+  role!: Role;
+  authProvider!: AuthProvider;
 }

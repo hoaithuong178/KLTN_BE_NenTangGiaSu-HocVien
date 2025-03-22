@@ -1,4 +1,10 @@
-import { AuthRequest, Login, OTPRegister, Register } from '@be/shared';
+import {
+  AuthRequest,
+  GoogleTokenVerificationDto,
+  Login,
+  OTPRegister,
+  Register,
+} from '@be/shared';
 import {
   Body,
   Controller,
@@ -66,5 +72,12 @@ export class AuthController {
     this.logger.log(`Received request to refresh token`);
 
     return await this.authService.refreshToken(refreshToken);
+  }
+
+  @Post('google')
+  async googleAuth(@Body() data: GoogleTokenVerificationDto) {
+    this.logger.log(`Received request to authenticate with Google`);
+
+    return await this.authService.googleAuth(data);
   }
 }

@@ -1,4 +1,9 @@
-import { Login, Logout, Register } from '@be/shared';
+import {
+  GoogleTokenVerificationDto,
+  Login,
+  Logout,
+  Register,
+} from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -29,5 +34,9 @@ export class AuthService {
     return lastValueFrom(
       this.userService.send({ cmd: 'refresh_token' }, refreshToken)
     );
+  }
+
+  googleAuth(data: GoogleTokenVerificationDto) {
+    return lastValueFrom(this.userService.send({ cmd: 'google_auth' }, data));
   }
 }
