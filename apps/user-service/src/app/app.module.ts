@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
 import { ChatController } from './controllers/chat.controller';
+import { FacebookAuthController } from './controllers/facebookAuth.controller';
 import { GoogleAuthController } from './controllers/googleAuth.controller';
 import { NotificationController } from './controllers/notification.controller';
 import { TutorController } from './controllers/tutor.controller';
@@ -27,6 +28,7 @@ import { UserProfileRepository } from './repositories/userProfile.repository';
 import { AuthService } from './services/auth.service';
 import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
+import { FacebookAuthService } from './services/facebookAuth.service';
 import { GoogleAuthService } from './services/googleAuth.service';
 import { NotificationService } from './services/notification.service';
 import { TutorService } from './services/tutor.service';
@@ -69,6 +71,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     NotificationController,
     ChatController,
     GoogleAuthController,
+    FacebookAuthController,
   ],
   providers: [
     AppService,
@@ -88,6 +91,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ConversationRepository,
     MessageRepository,
     GoogleAuthService,
+    FacebookAuthService,
   ],
 })
 export class AppModule {}

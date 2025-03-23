@@ -1,4 +1,5 @@
 import {
+  FacebookTokenVerificationDto,
   GoogleTokenVerificationDto,
   Login,
   Logout,
@@ -38,5 +39,9 @@ export class AuthService {
 
   googleAuth(data: GoogleTokenVerificationDto) {
     return lastValueFrom(this.userService.send({ cmd: 'google_auth' }, data));
+  }
+
+  facebookAuth(data: FacebookTokenVerificationDto) {
+    return lastValueFrom(this.userService.send({ cmd: 'facebook_auth' }, data));
   }
 }

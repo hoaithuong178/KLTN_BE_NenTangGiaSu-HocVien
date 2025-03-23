@@ -1,5 +1,6 @@
 import {
   AuthRequest,
+  FacebookTokenVerificationDto,
   GoogleTokenVerificationDto,
   Login,
   OTPRegister,
@@ -79,5 +80,12 @@ export class AuthController {
     this.logger.log(`Received request to authenticate with Google`);
 
     return await this.authService.googleAuth(data);
+  }
+
+  @Post('facebook')
+  async facebookAuth(@Body() data: FacebookTokenVerificationDto) {
+    this.logger.log(`Received request to authenticate with Facebook`);
+
+    return await this.authService.facebookAuth(data);
   }
 }
