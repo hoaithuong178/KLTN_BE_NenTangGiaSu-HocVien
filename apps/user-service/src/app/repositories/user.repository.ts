@@ -83,4 +83,11 @@ export class UserRepository {
   createWithGoogle(data: CreateUserWithGoogle) {
     return this.prismaService.user.create({ data });
   }
+
+  updateAvatar(id: string, avatar: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { avatar },
+    });
+  }
 }

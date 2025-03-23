@@ -1,6 +1,12 @@
 import { AuthProvider, Role } from '.prisma/user-service';
 import { FacebookTokenVerificationDto } from '@be/shared';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
 
@@ -10,7 +16,8 @@ export class FacebookAuthService {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    @Inject('USER_SERVICE') private readonly userClient: ClientProxy
   ) {}
 
   async authenticate(profile: FacebookTokenVerificationDto) {
@@ -35,7 +42,14 @@ export class FacebookAuthService {
         authProvider: AuthProvider.FACEBOOK,
         role: Role.STUDENT,
         password: '',
+        avatar: profile.picture?.data.url ?? undefined,
       });
+
+      if (profile.picture?.data.url)
+        this.userClient.emit('update_avatar', {
+          id: newUser.id,
+          avatar: profile.picture?.data.url,
+        });
 
       return this.authService.createAuthResponse(newUser);
     } catch (error) {

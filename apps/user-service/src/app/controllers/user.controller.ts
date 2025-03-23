@@ -1,7 +1,7 @@
 import { UserStatus } from '.prisma/user-service';
 import { JWTInput } from '@be/shared';
 import { Controller } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { UserService } from '../services/user.service';
 
 @Controller('users')
@@ -26,5 +26,10 @@ export class UserController {
   @MessagePattern({ cmd: 'update_user_status' })
   updateUserStatus(data: { id: string; status: UserStatus }) {
     return this.userService.updateUserStatus(data.id, data.status);
+  }
+
+  @EventPattern('update_avatar')
+  updateAvatar(data: { id: string; avatar: string }) {
+    return this.userService.updateAvatar(data.id, data.avatar);
   }
 }

@@ -1,5 +1,10 @@
 import { User, UserStatus } from '.prisma/user-service';
-import { BaseResponse, CreateUserWithGoogle, UserWithAvatar } from '@be/shared';
+import {
+  BaseResponse,
+  CreateUserWithGoogle,
+  uploadImageFromUrl,
+  UserWithAvatar,
+} from '@be/shared';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
@@ -12,14 +17,14 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) {}
 
-  private toUserWithAvatar<T extends { userProfiles: { avatar: string }[] }>(
-    user: T
-  ) {
+  private toUserWithAvatar<
+    T extends { userProfiles: { avatar: string }[]; avatar: string }
+  >(user: T) {
     const { userProfiles, ...restData } = user;
 
     return {
       ...restData,
-      avatar: userProfiles?.[0]?.avatar ?? null,
+      avatar: user.avatar ?? userProfiles?.[0]?.avatar ?? null,
     };
   }
 
@@ -51,7 +56,9 @@ export class UserService {
     this.logger.log(`Syncing user to ElasticSearch with id: ${id}`);
 
     const [tutor, user] = await Promise.all([
-      new Promise<any>((resolve, reject) => {
+      new Promise<{
+        found: boolean;
+      }>((resolve, reject) => {
         elasticClient
           .get({
             index: TUTOR_INDEX,
@@ -61,7 +68,7 @@ export class UserService {
           .catch((error) => {
             if (error.meta.statusCode === 404) {
               resolve(error);
-            } else reject(error);
+            } else reject(new Error(error.message || 'Failed to get tutor'));
           });
       }), // this.getTutorById(id),
       this.userRepository.getFullInfo(id),
@@ -154,5 +161,14 @@ export class UserService {
     this.logger.log(`Creating user with Google: ${data.email}`);
 
     return this.userRepository.createWithGoogle(data);
+  }
+
+  async updateAvatar(id: string, avatar: string) {
+    const url = await uploadImageFromUrl({
+      imageUrl: avatar,
+      folder: 'avatar',
+    });
+
+    return this.userRepository.updateAvatar(id, url);
   }
 }

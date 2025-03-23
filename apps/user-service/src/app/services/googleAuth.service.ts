@@ -1,6 +1,12 @@
 import { AuthProvider, Role } from '.prisma/user-service';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
 import { Auth, google } from 'googleapis';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
@@ -13,7 +19,8 @@ export class GoogleAuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    @Inject('USER_SERVICE') private readonly userClient: ClientProxy
   ) {
     const clientID = this.configService.get('GOOGLE_CLIENT_ID');
     const clientSecret = this.configService.get('GOOGLE_CLIENT_SECRET');
@@ -54,7 +61,15 @@ export class GoogleAuthService {
         authProvider: AuthProvider.GOOGLE,
         role: Role.STUDENT,
         password: '',
+        avatar: payload.picture ?? undefined,
       });
+
+      if (payload.picture) {
+        this.userClient.emit('update_avatar', {
+          id: newUser.id,
+          avatar: payload.picture,
+        });
+      }
 
       return this.authService.createAuthResponse(newUser);
     } catch (error) {

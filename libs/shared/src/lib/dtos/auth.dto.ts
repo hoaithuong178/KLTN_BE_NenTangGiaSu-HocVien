@@ -96,6 +96,7 @@ export class CreateUserWithGoogle {
   password!: string;
   role!: Role;
   authProvider!: AuthProvider;
+  avatar?: string;
 }
 
 export class FacebookTokenVerificationDto {
@@ -103,6 +104,8 @@ export class FacebookTokenVerificationDto {
   name!: string;
   id!: string;
   picture!: {
-    url: string;
+    data: {
+      url: string;
+    };
   };
 }

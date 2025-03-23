@@ -56,7 +56,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 @Module({
   imports: [
     ClientsModule.register(
-      registerServices('EDUCATION', 'CHATBOT_USER', 'CHAT')
+      registerServices('EDUCATION', 'CHATBOT_USER', 'CHAT', 'USER')
     ),
     PrismaModule,
     ScheduleModule.forRoot(),
