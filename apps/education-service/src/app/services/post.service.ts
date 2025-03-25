@@ -1,13 +1,24 @@
 import { Post, PostStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import { BaseResponse, DeletePostRequest, PostSearchRequest } from '@be/shared';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryDslOperator,
+  QueryDslQueryContainer,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { POST_ELASTIC_INDEX } from '../constants';
 import { PostRepository } from '../repositories/post.repository';
 import { SubjectRepository } from '../repositories/subject.repository';
+
+interface MatchFieldOption {
+  field?: string;
+  fuzziness?: string | number;
+  operator?: QueryDslOperator;
+  query?: string;
+}
 
 @Injectable()
 export class PostService {
@@ -23,7 +34,9 @@ export class PostService {
   async create(data: Post) {
     this.logger.log('Creating post with data: ' + JSON.stringify(data));
 
-    const subject = await this.subjectRepository.findById(String(data.subject));
+    const subject = await this.subjectRepository.findById(
+      data.subject as unknown as string
+    );
 
     if (!subject) {
       throw new RpcException('Subject not found');
@@ -118,7 +131,7 @@ export class PostService {
   }
 
   async delete(data: DeletePostRequest) {
-    this.logger.log('Deleting post with data: ' + data);
+    this.logger.log('Deleting post with data: ' + JSON.stringify(data));
     let deletedPost: Post | null = null;
 
     if (data.role === Role.ADMIN) {
@@ -149,181 +162,136 @@ export class PostService {
     return response;
   }
 
-  async search(searchRequest: PostSearchRequest) {
+  private buildMatchQueries(
+    searchRequest: PostSearchRequest
+  ): QueryDslQueryContainer[] {
+    const must: QueryDslQueryContainer[] = [];
+
+    const matchFields: Record<string, MatchFieldOption> = {
+      title: { fuzziness: 'AUTO' },
+      content: { fuzziness: 'AUTO' },
+      grade: {},
+      'subject.name': { field: searchRequest.subject },
+      mode: {},
+      requirements: { fuzziness: 'AUTO' },
+      locations: {
+        query: searchRequest.location,
+        fuzziness: 'AUTO',
+        operator: 'AND' as QueryDslOperator,
+      },
+    };
+
+    Object.entries(matchFields).forEach(([field, options]) => {
+      const value =
+        options.field || searchRequest[field as keyof PostSearchRequest];
+      if (value) {
+        must.push({
+          match: {
+            [field]: {
+              query: value,
+              ...options,
+            },
+          },
+        });
+      }
+    });
+
+    return must;
+  }
+
+  private buildRangeQueries(
+    searchRequest: PostSearchRequest
+  ): QueryDslQueryContainer[] {
     const {
-      query,
-      grade,
-      title,
-      content,
-      location,
       minSessionPerWeek,
       maxSessionPerWeek,
       minDuration,
       maxDuration,
-      subject,
-      requirements,
-      mode,
-      maxFeePerSession,
       minFeePerSession,
+      maxFeePerSession,
       sessionPerWeek,
     } = searchRequest;
 
-    const page = Number(searchRequest.page) || 1;
-    const limit = Number(searchRequest.limit) || 10;
-
-    const must: QueryDslQueryContainer[] = [];
-
-    if (title) {
-      must.push({
-        match: {
-          title: {
-            query: title,
-            fuzziness: 'AUTO',
-          },
-        },
-      });
-    }
-
-    if (content) {
-      must.push({
-        match: {
-          content: {
-            query: content,
-            fuzziness: 'AUTO',
-          },
-        },
-      });
-    }
-
-    if (grade) {
-      must.push({ match: { grade } });
-    }
-
-    if (location) {
-      must.push({
-        match: {
-          locations: {
-            query: location,
-            fuzziness: 'AUTO',
-            operator: 'AND',
-          },
-        },
-      });
-    }
-
-    if (subject) {
-      must.push({ match: { 'subject.name': subject } });
-    }
-
-    if (mode) {
-      must.push({ match: { mode } });
-    }
-
-    if (requirements) {
-      must.push({
-        match: {
-          requirements: {
-            query: requirements,
-            fuzziness: 'AUTO',
-          },
-        },
-      });
-    }
-
-    // Range queries
     const rangeQueries = [];
 
     if (sessionPerWeek) {
       rangeQueries.push({ match: { sessionPerWeek } });
     }
 
-    if (minSessionPerWeek || maxSessionPerWeek) {
-      const sessionPerWeekRange: {
-        sessionPerWeek: {
-          gte?: number;
-          lte?: number;
-        };
-      } = { sessionPerWeek: {} };
-      if (minSessionPerWeek)
-        sessionPerWeekRange.sessionPerWeek.gte = minSessionPerWeek;
-      if (maxSessionPerWeek)
-        sessionPerWeekRange.sessionPerWeek.lte = maxSessionPerWeek;
-      rangeQueries.push({ range: sessionPerWeekRange });
+    const ranges = {
+      sessionPerWeek: { min: minSessionPerWeek, max: maxSessionPerWeek },
+      duration: { min: minDuration, max: maxDuration },
+      feePerSession: { min: minFeePerSession, max: maxFeePerSession },
+    };
+
+    Object.entries(ranges).forEach(([field, { min, max }]) => {
+      if (min || max) {
+        rangeQueries.push({
+          range: {
+            [field]: {
+              ...(min && { gte: min }),
+              ...(max && { lte: max }),
+            },
+          },
+        });
+      }
+    });
+
+    return rangeQueries;
+  }
+
+  async search(searchRequest: PostSearchRequest) {
+    const must = [
+      ...this.buildMatchQueries(searchRequest),
+      ...this.buildRangeQueries(searchRequest),
+    ];
+
+    if (searchRequest.query) {
+      must.push({ query_string: { query: String(searchRequest.query) } });
     }
-
-    if (minDuration || maxDuration) {
-      const durationRange: {
-        duration: {
-          gte?: number;
-          lte?: number;
-        };
-      } = { duration: {} };
-      if (minDuration) durationRange.duration.gte = minDuration;
-      if (maxDuration) durationRange.duration.lte = maxDuration;
-      rangeQueries.push({ range: durationRange });
-    }
-
-    if (minFeePerSession || maxFeePerSession) {
-      const feePerSessionRange: {
-        feePerSession: {
-          gte?: number;
-          lte?: number;
-        };
-      } = { feePerSession: {} };
-
-      if (minFeePerSession)
-        feePerSessionRange.feePerSession.gte = minFeePerSession;
-      if (maxFeePerSession)
-        feePerSessionRange.feePerSession.lte = maxFeePerSession;
-      rangeQueries.push({ range: feePerSessionRange });
-    }
-
-    if (query) {
-      must.push({
-        query_string: {
-          query: String(query),
-        },
-      });
-    }
-
     must.push({ match: { status: PostStatus.APPROVED } });
 
-    must.push(...rangeQueries);
+    const { page = 1, limit = 10 } = searchRequest;
 
     const response = await elasticClient.search({
       index: POST_ELASTIC_INDEX,
       body: {
         from: (page - 1) * limit,
         size: limit,
-        query: {
-          bool: {
-            must,
-          },
-        },
+        query: { bool: { must } },
       },
     });
 
+    return this.formatSearchResponse(
+      response as SearchResponse<Post>,
+      page,
+      limit
+    );
+  }
+
+  private formatSearchResponse(
+    response: SearchResponse<Post>,
+    page: number,
+    limit: number
+  ) {
     const hits = response.hits.hits;
     const totalItems =
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total.value;
-
-    const searchResults = hits.map((hit) => ({
-      ...(hit._source as Post),
-      score: hit._score || 0,
-    }));
-
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
       statusCode: HttpStatus.OK,
-      data: searchResults,
+      data: hits.map((hit) => ({
+        ...hit._source,
+        score: hit._score || 0,
+      })),
       pagination: {
         totalPages,
         totalItems,
-        page,
-        pageSize: limit,
+        page: Number(page),
+        pageSize: Number(limit),
         hasNext: page < totalPages,
         hasPrev: page > 1,
       },
