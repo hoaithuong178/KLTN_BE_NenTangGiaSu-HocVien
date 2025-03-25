@@ -100,4 +100,20 @@ export class PostController {
       role: req.user.role as Role,
     });
   }
+
+  @Put(':id/approve')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
+  async approvePost(@Param('id') id: string) {
+    this.logger.log(`Approve post ${id}`);
+    return this.postService.approvePost(id);
+  }
+
+  @Put(':id/reject')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
+  async rejectPost(@Param('id') id: string, @Body() data: { reason: string }) {
+    this.logger.log(`Reject post ${id} with reason: ${data.reason}`);
+    return this.postService.rejectPost(id, data.reason);
+  }
 }

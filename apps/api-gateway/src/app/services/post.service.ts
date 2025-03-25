@@ -38,4 +38,14 @@ export class PostService {
       this.postService.send({ cmd: 'search-posts' }, searchRequest)
     );
   }
+
+  approvePost(id: string) {
+    return lastValueFrom(this.postService.send({ cmd: 'approve-post' }, id));
+  }
+
+  rejectPost(id: string, reason: string) {
+    return lastValueFrom(
+      this.postService.send({ cmd: 'reject-post' }, { id, reason })
+    );
+  }
 }

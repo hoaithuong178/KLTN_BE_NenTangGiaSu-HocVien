@@ -21,6 +21,7 @@ import { ClassPatternRepository } from './repositories/classPattern.repository';
 import { FavoritePostRepository } from './repositories/favoritePost.repository';
 import { LessonPatternRepository } from './repositories/lessonPattern.repository';
 import { PostRepository } from './repositories/post.repository';
+import { RejectPostRepository } from './repositories/rejectPost.repository';
 import { RequestRepository } from './repositories/request.repository';
 import { SubjectRepository } from './repositories/subject.repository';
 import { TimeSlotRepository } from './repositories/timeSlot.repository';
@@ -90,6 +91,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ClassPatternRepository,
     LessonPatternService,
     LessonPatternRepository,
+    RejectPostRepository,
   ],
 })
 export class AppModule {

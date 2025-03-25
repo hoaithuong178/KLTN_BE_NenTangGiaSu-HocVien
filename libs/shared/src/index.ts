@@ -5,6 +5,7 @@ export * from './lib/dtos/conversation.dto';
 export * from './lib/dtos/message.dto';
 export * from './lib/dtos/notification.dto';
 export * from './lib/dtos/post.dto';
+export * from './lib/dtos/rejectPost.dto';
 export * from './lib/dtos/request.dto';
 export * from './lib/dtos/subject.dto';
 export * from './lib/dtos/timeSlot.dto';

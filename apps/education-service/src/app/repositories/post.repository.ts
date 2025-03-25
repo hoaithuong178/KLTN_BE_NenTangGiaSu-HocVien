@@ -45,16 +45,9 @@ export class PostRepository {
     });
   }
 
-  update(id: string, { user, ...data }: Partial<Post>) {
+  update(id: string, data: Partial<Post>) {
     return this.prismaService.post.update({
-      where: {
-        id,
-        user: {
-          is: {
-            id: user.id,
-          },
-        },
-      },
+      where: { id },
       data: {
         ...data,
         postTime: data.postTime ? new Date(data.postTime) : undefined,

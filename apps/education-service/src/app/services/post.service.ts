@@ -10,7 +10,9 @@ import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
 import { POST_ELASTIC_INDEX } from '../constants';
+import { PrismaService } from '../prisma/prisma.service';
 import { PostRepository } from '../repositories/post.repository';
+import { RejectPostRepository } from '../repositories/rejectPost.repository';
 import { SubjectRepository } from '../repositories/subject.repository';
 
 interface MatchFieldOption {
@@ -27,6 +29,8 @@ export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly subjectRepository: SubjectRepository,
+    private readonly prismaService: PrismaService,
+    private readonly rejectPostRepository: RejectPostRepository,
     @Inject('CHATBOT_EDUCATION_SERVICE')
     private readonly chatbotEducationService: ClientProxy
   ) {}
@@ -339,5 +343,74 @@ export class PostService {
       this.logger.error('Lỗi khi đồng bộ posts vào Elasticsearch:', error);
       throw error;
     }
+  }
+
+  async approve(id: string) {
+    this.logger.log('Approving post with ID: ' + id);
+    const updatedPost = await this.postRepository.update(id, {
+      status: PostStatus.APPROVED,
+    });
+
+    // Đồng bộ post đã cập nhật vào Elasticsearch
+    elasticClient
+      .update({
+        index: POST_ELASTIC_INDEX,
+        id: id,
+        body: {
+          doc: updatedPost,
+        },
+      })
+      .catch((error) =>
+        this.logger.error(
+          'Lỗi khi đồng bộ post đã cập nhật vào Elasticsearch:',
+          error
+        )
+      );
+
+    this.chatbotEducationService.emit('post-updated', updatedPost);
+
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.OK,
+      data: updatedPost,
+    };
+    return response;
+  }
+
+  async reject(id: string, reason: string) {
+    this.logger.log(`Rejecting post ${id} with reason: ${reason}`);
+
+    const [updatedPost] = await this.prismaService.$transaction([
+      this.postRepository.update(id, {
+        status: PostStatus.REJECTED,
+      }),
+      this.rejectPostRepository.create({
+        postId: id,
+        reason,
+      }),
+    ]);
+
+    // Đồng bộ post đã cập nhật vào Elasticsearch
+    elasticClient
+      .update({
+        index: POST_ELASTIC_INDEX,
+        id: id,
+        body: {
+          doc: updatedPost,
+        },
+      })
+      .catch((error) =>
+        this.logger.error(
+          'Lỗi khi đồng bộ post đã cập nhật vào Elasticsearch:',
+          error
+        )
+      );
+
+    this.chatbotEducationService.emit('post-updated', updatedPost);
+
+    const response: BaseResponse<Post> = {
+      statusCode: HttpStatus.OK,
+      data: updatedPost,
+    };
+    return response;
   }
 }

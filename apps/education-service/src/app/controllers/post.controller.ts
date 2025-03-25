@@ -37,4 +37,14 @@ export class PostController {
   search(searchRequest: PostSearchRequest) {
     return this.postService.search(searchRequest);
   }
+
+  @MessagePattern({ cmd: 'approve-post' })
+  approve(id: string) {
+    return this.postService.approve(id);
+  }
+
+  @MessagePattern({ cmd: 'reject-post' })
+  reject(data: { id: string; reason: string }) {
+    return this.postService.reject(data.id, data.reason);
+  }
 }
