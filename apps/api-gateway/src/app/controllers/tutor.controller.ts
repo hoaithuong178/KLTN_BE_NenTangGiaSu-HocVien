@@ -62,4 +62,11 @@ export class TutorController {
 
     return await this.tutorService.searchTutor(data);
   }
+
+  @Get('specializations/count')
+  async countTutorsBySpecializations() {
+    this.logger.log('Received request to count tutors by specializations');
+
+    return await this.tutorService.countTutorsBySpecializations();
+  }
 }

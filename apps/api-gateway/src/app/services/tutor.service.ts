@@ -26,4 +26,10 @@ export class TutorService {
   searchTutor(data: SearchTutor) {
     return lastValueFrom(this.tutorService.send({ cmd: 'search_tutor' }, data));
   }
+
+  countTutorsBySpecializations() {
+    return lastValueFrom(
+      this.tutorService.send({ cmd: 'count_tutors_by_specializations' }, {})
+    );
+  }
 }

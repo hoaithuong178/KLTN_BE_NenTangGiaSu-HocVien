@@ -43,4 +43,9 @@ export class TutorController {
   searchTutor(data: SearchTutor) {
     return this.tutorService.searchTutor(data);
   }
+
+  @MessagePattern({ cmd: 'count_tutors_by_specializations' })
+  countTutorsBySpecializations() {
+    return this.tutorService.countBySpecializations();
+  }
 }

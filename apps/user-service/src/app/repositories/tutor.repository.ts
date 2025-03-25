@@ -37,4 +37,35 @@ export class TutorRepository {
       data,
     });
   }
+
+  async countBySpecializations() {
+    const result = await this.prismaService.tutorProfile.groupBy({
+      by: ['specializations'],
+      _count: {
+        id: true,
+      },
+    });
+
+    // Chuyển đổi kết quả thành định dạng phù hợp
+    const flattenedResults = result.flatMap((item) =>
+      item.specializations.map((specialization) => ({
+        specialization,
+        count: item._count.id,
+      }))
+    );
+
+    // Gộp các kết quả trùng lặp
+    const countMap = new Map<string, number>();
+    flattenedResults.forEach((item) => {
+      countMap.set(
+        item.specialization,
+        (countMap.get(item.specialization) || 0) + item.count
+      );
+    });
+
+    return Array.from(countMap.entries()).map(([specialization, count]) => ({
+      specialization,
+      count,
+    }));
+  }
 }

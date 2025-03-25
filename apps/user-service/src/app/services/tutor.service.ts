@@ -221,4 +221,19 @@ export class TutorService {
 
     return response;
   }
+
+  async countBySpecializations() {
+    this.logger.log('Counting tutors by specializations');
+
+    const counts = await this.tutorRepository.countBySpecializations();
+
+    const response: BaseResponse<
+      Array<{ specialization: string; count: number }>
+    > = {
+      statusCode: HttpStatus.OK,
+      data: counts,
+    };
+
+    return response;
+  }
 }
