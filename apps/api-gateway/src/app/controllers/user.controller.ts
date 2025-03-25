@@ -1,5 +1,5 @@
 import { Role, UserStatus } from '.prisma/user-service';
-import { AuthRequest } from '@be/shared';
+import { AuthRequest, GetUserForAdmin } from '@be/shared';
 import {
   Body,
   Controller,
@@ -7,6 +7,7 @@ import {
   Logger,
   Param,
   Patch,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -31,13 +32,6 @@ export class UserController {
     return await this.userService.getMe(data.user);
   }
 
-  @Get('admin')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles([Role.ADMIN])
-  async getUsersForAdmin() {
-    return await this.userService.getUsersForAdmin();
-  }
-
   @Patch('admin/:id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles([Role.ADMIN])
@@ -46,5 +40,16 @@ export class UserController {
     @Body() body: { status: UserStatus }
   ) {
     return await this.userService.updateUserStatus(id, body.status);
+  }
+
+  @Get('admin')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
+  async getUserForAdmin(@Query() query: GetUserForAdmin) {
+    this.logger.log(
+      `Received request to get user for admin: ${JSON.stringify(query)}`
+    );
+
+    return await this.userService.getUserForAdmin(query);
   }
 }

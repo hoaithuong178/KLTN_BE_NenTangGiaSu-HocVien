@@ -1,5 +1,5 @@
 import { UserStatus } from '.prisma/user-service';
-import { CreateUser, CreateUserWithGoogle } from '@be/shared';
+import { CreateUser, CreateUserWithGoogle, GetUserForAdmin } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -95,6 +95,27 @@ export class UserRepository {
     return this.prismaService.user.update({
       where: { id },
       data: { violate },
+    });
+  }
+
+  getUserForAdmin({ search, role, status, violate }: GetUserForAdmin) {
+    return this.prismaService.user.findMany({
+      where: {
+        ...(search && {
+          OR: [{ name: { contains: search } }, { email: { contains: search } }],
+        }),
+        ...(role && { role }),
+        ...(status && { status }),
+        ...(violate && { violate }),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        violate: true,
+      },
     });
   }
 }

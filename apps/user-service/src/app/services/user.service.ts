@@ -2,6 +2,7 @@ import { User, UserStatus } from '.prisma/user-service';
 import {
   BaseResponse,
   CreateUserWithGoogle,
+  GetUserForAdmin,
   uploadImageFromUrl,
   UserWithAvatar,
 } from '@be/shared';
@@ -170,5 +171,18 @@ export class UserService {
     });
 
     return this.userRepository.updateAvatar(id, url);
+  }
+
+  async getUserForAdmin(data: GetUserForAdmin) {
+    this.logger.log(`Getting user for admin: ${JSON.stringify(data)}`);
+
+    const users = await this.userRepository.getUserForAdmin(data);
+
+    const response = {
+      statusCode: HttpStatus.OK,
+      data: users,
+    };
+
+    return response;
   }
 }

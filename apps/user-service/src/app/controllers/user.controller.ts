@@ -1,5 +1,5 @@
 import { UserStatus } from '.prisma/user-service';
-import { JWTInput } from '@be/shared';
+import { GetUserForAdmin, JWTInput } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { UserService } from '../services/user.service';
@@ -31,5 +31,10 @@ export class UserController {
   @EventPattern('update_avatar')
   updateAvatar(data: { id: string; avatar: string }) {
     return this.userService.updateAvatar(data.id, data.avatar);
+  }
+
+  @MessagePattern({ cmd: 'get_user_for_admin' })
+  getUserForAdmin(data: GetUserForAdmin) {
+    return this.userService.getUserForAdmin(data);
   }
 }
