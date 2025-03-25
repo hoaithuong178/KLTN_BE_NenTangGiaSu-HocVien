@@ -16,6 +16,7 @@ import { NotificationController } from './controllers/notification.controller';
 import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
+import { ViolateController } from './controllers/violate.controller';
 import { ChatGateway } from './gateways/chat.gateway';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConversationRepository } from './repositories/conversation.repository';
@@ -25,6 +26,7 @@ import { NotificationRepository } from './repositories/notification.repository';
 import { TutorRepository } from './repositories/tutor.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserProfileRepository } from './repositories/userProfile.repository';
+import { ViolateRepository } from './repositories/violate.repository';
 import { AuthService } from './services/auth.service';
 import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
@@ -34,6 +36,7 @@ import { NotificationService } from './services/notification.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/userProfile.service';
+import { ViolateService } from './services/violate.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
 
@@ -72,6 +75,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ChatController,
     GoogleAuthController,
     FacebookAuthController,
+    ViolateController,
   ],
   providers: [
     AppService,
@@ -92,6 +96,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     MessageRepository,
     GoogleAuthService,
     FacebookAuthService,
+    ViolateService,
+    ViolateRepository,
   ],
 })
 export class AppModule {}

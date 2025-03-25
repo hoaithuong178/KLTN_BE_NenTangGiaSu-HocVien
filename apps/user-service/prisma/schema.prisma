@@ -43,6 +43,7 @@ model User {
   lastActive           DateTime?      @map("last_active")
   authProvider         AuthProvider   @default(EMAIL)
   avatar               String?        @map("avatar")
+  violate              Int            @default(0) @map("violate")
   createdAt            DateTime       @default(now()) @map("created_at")
   updatedAt            DateTime       @updatedAt @map("updated_at")
   createdBy            String?        @map("created_by")
@@ -57,8 +58,21 @@ model User {
   UserUpdateProfile    UserProfile[]  @relation("UpdatedBy")
   userProfiles         UserProfile[]
   tutorProfiles        TutorProfile[]
+  violates             Violate[]
 
   @@map("users")
+}
+
+model Violate {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  reason    String
+  violate   Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("violates")
 }
 
 enum Gender {

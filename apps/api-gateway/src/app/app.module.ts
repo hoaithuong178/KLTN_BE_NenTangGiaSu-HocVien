@@ -24,6 +24,7 @@ import { TimeSlotController } from './controllers/timeSlot.controller';
 import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
+import { ViolateController } from './controllers/violate.controller';
 import { AuthService } from './services/auth.service';
 import { BlockchainService } from './services/blockchain.service';
 import { ChatService } from './services/chat.service';
@@ -41,6 +42,7 @@ import { TimeSlotService } from './services/timeSlot.service';
 import { TutorService } from './services/tutor.service';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/userProfile.service';
+import { ViolateService } from './services/violate.service';
 
 const RABBIT_MQ_URL = process.env.RABBIT_MQ_URL;
 
@@ -88,6 +90,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ClassPatternController,
     LessonPatternController,
     BlockchainController,
+    ViolateController,
   ],
   providers: [
     AuthService,
@@ -107,6 +110,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ClassPatternService,
     LessonPatternService,
     BlockchainService,
+    ViolateService,
   ],
 })
 export class AppModule {}

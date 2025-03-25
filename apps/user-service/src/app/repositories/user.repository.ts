@@ -90,4 +90,11 @@ export class UserRepository {
       data: { avatar },
     });
   }
+
+  updateViolate(id: string, violate: number) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { violate },
+    });
+  }
 }
