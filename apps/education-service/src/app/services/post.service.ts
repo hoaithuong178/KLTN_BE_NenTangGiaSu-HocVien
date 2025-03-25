@@ -1,4 +1,4 @@
-import { Post } from '.prisma/education-service';
+import { Post, PostStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import { BaseResponse, DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -58,6 +58,17 @@ export class PostService {
   async findAll() {
     this.logger.log('Getting all posts');
     const posts = await this.postRepository.findAll();
+
+    const response: BaseResponse<Post[]> = {
+      statusCode: HttpStatus.OK,
+      data: posts,
+    };
+    return response;
+  }
+
+  async findAllApproved() {
+    this.logger.log('Getting all approved posts');
+    const posts = await this.postRepository.findAllApproved();
 
     const response: BaseResponse<Post[]> = {
       statusCode: HttpStatus.OK,
@@ -274,6 +285,8 @@ export class PostService {
         },
       });
     }
+
+    must.push({ match: { status: PostStatus.APPROVED } });
 
     must.push(...rangeQueries);
 

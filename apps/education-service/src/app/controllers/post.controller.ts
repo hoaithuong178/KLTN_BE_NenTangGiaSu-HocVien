@@ -13,9 +13,9 @@ export class PostController {
     return this.postService.create(data);
   }
 
-  @MessagePattern({ cmd: 'get-all-posts' })
+  @MessagePattern({ cmd: 'get-all-approved-posts' })
   findAll() {
-    return this.postService.findAll();
+    return this.postService.findAllApproved();
   }
 
   @MessagePattern({ cmd: 'get-post-by-id' })

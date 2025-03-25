@@ -14,7 +14,9 @@ export class PostService {
   }
 
   getAllPosts() {
-    return lastValueFrom(this.postService.send({ cmd: 'get-all-posts' }, {}));
+    return lastValueFrom(
+      this.postService.send({ cmd: 'get-all-approved-posts' }, {})
+    );
   }
 
   getPostById(id: string) {

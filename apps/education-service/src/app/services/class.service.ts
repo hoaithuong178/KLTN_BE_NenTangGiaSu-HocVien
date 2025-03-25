@@ -1,5 +1,5 @@
-import { Class, ClassStatus, UserPost } from '.prisma/education-service';
-import { Role, User } from '.prisma/user-service';
+import { Class, ClassStatus, User, UserPost } from '.prisma/education-service';
+import { Role } from '.prisma/user-service';
 import {
   BaseResponse,
   ClassDetail,

@@ -234,6 +234,12 @@ enum Grade {
   OTHER
 }
 
+enum PostStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Post {
   id             String       @id @default(uuid()) @map("_id")
   user           UserPost     @map("user_id")
@@ -249,10 +255,22 @@ model Post {
   requirements   String[]     @default([]) @map("requirements")
   mode           Boolean      @map("mode")
   feePerSession  Float        @map("fee_per_session")
+  status         PostStatus   @default(PENDING)
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
+  rejects        PostReject[]
 
   @@map("posts")
+}
+
+model PostReject {
+  id        String   @id @default(uuid()) @map("_id")
+  postId    String   @map("post_id")
+  reason    String
+  createdAt DateTime @default(now()) @map("created_at")
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@map("post_rejects")
 }
 
 type UserPost {

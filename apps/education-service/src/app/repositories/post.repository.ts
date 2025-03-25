@@ -1,4 +1,4 @@
-import { Post } from '.prisma/education-service';
+import { Post, PostStatus } from '.prisma/education-service';
 import { UserBase } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,6 +24,12 @@ export class PostRepository {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  }
+
+  findAllApproved() {
+    return this.prismaService.post.findMany({
+      where: { status: PostStatus.APPROVED },
     });
   }
 
