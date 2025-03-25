@@ -93,4 +93,13 @@ export class PostRepository {
       },
     });
   }
+
+  findByStatus(status: PostStatus) {
+    return this.prismaService.post.findMany({
+      where: { status },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }

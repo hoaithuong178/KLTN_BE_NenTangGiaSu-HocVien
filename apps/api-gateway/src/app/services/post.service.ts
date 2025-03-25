@@ -1,3 +1,4 @@
+import { PostStatus } from '.prisma/education-service';
 import { CreatePost, DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -46,6 +47,12 @@ export class PostService {
   rejectPost(id: string, reason: string) {
     return lastValueFrom(
       this.postService.send({ cmd: 'reject-post' }, { id, reason })
+    );
+  }
+
+  getPostsByStatus(status: PostStatus) {
+    return lastValueFrom(
+      this.postService.send({ cmd: 'get-posts-by-status' }, status)
     );
   }
 }

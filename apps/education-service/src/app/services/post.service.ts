@@ -413,4 +413,15 @@ export class PostService {
     };
     return response;
   }
+
+  async findByStatus(status: PostStatus) {
+    this.logger.log('Getting posts by status: ' + status);
+    const posts = await this.postRepository.findByStatus(status);
+
+    const response: BaseResponse<Post[]> = {
+      statusCode: HttpStatus.OK,
+      data: posts,
+    };
+    return response;
+  }
 }

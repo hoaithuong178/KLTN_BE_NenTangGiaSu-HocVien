@@ -1,3 +1,4 @@
+import { PostStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
 import { AuthRequest, CreatePostRequest, PostSearchRequest } from '@be/shared';
 import {
@@ -115,5 +116,13 @@ export class PostController {
   async rejectPost(@Param('id') id: string, @Body() data: { reason: string }) {
     this.logger.log(`Reject post ${id} with reason: ${data.reason}`);
     return this.postService.rejectPost(id, data.reason);
+  }
+
+  @Get('status/:status')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
+  async getPostsByStatus(@Param('status') status: PostStatus) {
+    this.logger.log(`Get posts by status: ${status}`);
+    return this.postService.getPostsByStatus(status);
   }
 }

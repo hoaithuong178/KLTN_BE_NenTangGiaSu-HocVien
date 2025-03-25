@@ -1,4 +1,4 @@
-import { Post } from '.prisma/education-service';
+import { Post, PostStatus } from '.prisma/education-service';
 import { DeletePostRequest, PostSearchRequest } from '@be/shared';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
@@ -46,5 +46,10 @@ export class PostController {
   @MessagePattern({ cmd: 'reject-post' })
   reject(data: { id: string; reason: string }) {
     return this.postService.reject(data.id, data.reason);
+  }
+
+  @MessagePattern({ cmd: 'get-posts-by-status' })
+  findByStatus(status: PostStatus) {
+    return this.postService.findByStatus(status);
   }
 }
