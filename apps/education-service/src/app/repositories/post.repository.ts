@@ -100,6 +100,9 @@ export class PostRepository {
       orderBy: {
         createdAt: 'desc',
       },
+      include: {
+        rejects: true,
+      },
     });
   }
 }
