@@ -185,4 +185,34 @@ export class UserService {
 
     return response;
   }
+
+  async syncAllTutorsToElasticSearch() {
+    this.logger.log('Starting sync all tutors to ElasticSearch');
+
+    const tutors = await this.userRepository.getAllTutors();
+
+    for (const tutor of tutors) {
+      try {
+        const { userProfiles, tutorProfiles, ...restData } = tutor;
+
+        const newData = {
+          ...restData,
+          userProfile: userProfiles.length ? userProfiles[0] : null,
+          tutorProfile: tutorProfiles.length ? tutorProfiles[0] : null,
+        };
+
+        await elasticClient.index({
+          index: TUTOR_INDEX,
+          id: tutor.id,
+          body: newData,
+        });
+
+        this.logger.log(`Synced tutor ${tutor.id} to ElasticSearch`);
+      } catch (error) {
+        this.logger.error(`Failed to sync tutor ${tutor.id}:`, error);
+      }
+    }
+
+    this.logger.log('Finished syncing all tutors to ElasticSearch');
+  }
 }

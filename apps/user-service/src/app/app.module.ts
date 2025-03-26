@@ -100,4 +100,10 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ViolateRepository,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly userService: UserService) {}
+
+  async onModuleInit() {
+    await this.userService.syncAllTutorsToElasticSearch();
+  }
+}

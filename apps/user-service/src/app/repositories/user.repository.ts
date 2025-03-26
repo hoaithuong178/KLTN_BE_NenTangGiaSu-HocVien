@@ -118,4 +118,18 @@ export class UserRepository {
       },
     });
   }
+
+  getAllTutors() {
+    return this.prismaService.user.findMany({
+      where: {
+        tutorProfiles: {
+          some: {},
+        },
+      },
+      include: {
+        userProfiles: true,
+        tutorProfiles: true,
+      },
+    });
+  }
 }
