@@ -32,6 +32,20 @@ async function bootstrap() {
 
   await app.listen();
 
+  const classApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.RMQ,
+      options: {
+        urls: [RABBIT_MQ_URL],
+        queue: 'blockchain_class_queue',
+        queueOptions: { durable: false },
+      },
+    }
+  );
+
+  await classApp.listen();
+
   const httpApp = await NestFactory.create(HealthModule);
   const port = process.env.PORT || 4003;
   await httpApp.listen(port);

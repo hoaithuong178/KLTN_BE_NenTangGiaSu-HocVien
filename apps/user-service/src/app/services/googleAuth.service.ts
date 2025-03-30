@@ -77,27 +77,4 @@ export class GoogleAuthService {
       throw new UnauthorizedException('Google authentication failed');
     }
   }
-
-  async getUserData(token: string) {
-    this.oauthClient.setCredentials({ access_token: token });
-
-    const userInfoClient = google.oauth2('v2').userinfo;
-
-    const userInfo = await userInfoClient.get({
-      auth: this.oauthClient,
-    });
-
-    return userInfo.data;
-  }
-
-  googleLogin(req) {
-    if (!req.user) {
-      return 'Không có người dùng từ Google';
-    }
-
-    return {
-      message: 'Thông tin người dùng từ Google',
-      user: req.user,
-    };
-  }
 }

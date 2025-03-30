@@ -1,5 +1,5 @@
-import { Class, ClassStatus } from '.prisma/education-service';
-import { UpdateClassRequest } from '@be/shared';
+import { ClassStatus } from '.prisma/education-service';
+import { CreateClassRequest, UpdateClassRequest } from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ClassRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(data: Class) {
+  create(data: CreateClassRequest) {
     return this.prismaService.class.create({
       data: {
         ...data,

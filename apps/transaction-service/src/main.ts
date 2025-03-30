@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
+import { ContractModule } from './app/contract/contract.module';
 import { HealthModule } from './app/health/health.module';
 
 dotenv.config();
@@ -31,6 +32,20 @@ async function bootstrap() {
   );
 
   await app.listen();
+
+  const contractApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    ContractModule,
+    {
+      transport: Transport.RMQ,
+      options: {
+        urls: [RABBIT_MQ_URL],
+        queue: 'blockchain_contract_queue',
+        queueOptions: { durable: false },
+      },
+    }
+  );
+
+  await contractApp.listen();
 
   const httpApp = await NestFactory.create(HealthModule);
   const port = process.env.PORT || 4004;

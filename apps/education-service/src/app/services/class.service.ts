@@ -42,6 +42,19 @@ export class ClassService {
     };
   }
 
+  async createClass(data: CreateClassRequest) {
+    this.logger.log('Creating class with data: ' + JSON.stringify(data));
+
+    const subject = await this.subjectRepository.findById(data.subject.id);
+
+    const createdClass = await this.classRepository.create({
+      ...data,
+      subject,
+    });
+
+    return createdClass;
+  }
+
   async create(data: CreateClassRequest) {
     this.logger.log('Creating class with data: ' + JSON.stringify(data));
 

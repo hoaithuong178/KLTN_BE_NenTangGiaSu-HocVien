@@ -7,7 +7,13 @@ import {
   UpdateClassRequest,
 } from '@be/shared';
 import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import {
+  Ctx,
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 import { ClassService } from '../services/class.service';
 
 @Controller()
@@ -56,5 +62,34 @@ export class ClassController {
     userId: string;
   }): Promise<BaseResponse<Class>> {
     return this.classService.updateStatus(data.id, data.status, data.userId);
+  }
+
+  @EventPattern('contract.created')
+  async handleContractCreated(
+    @Payload() event: any,
+    @Ctx() context: RmqContext
+  ) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+
+    try {
+      this.logger.log('Class Controller nhận được sự kiện contract:', event);
+
+      // const data: CreateClassRequest = {
+      //   id:
+      // }
+
+      // const createdClass = await this.classService.createClass(data)
+
+      // Đánh dấu message đã được xử lý thành công
+      return event;
+    } catch (error) {
+      this.logger.error(
+        'Class Controller - Lỗi khi xử lý contract event:',
+        error
+      );
+
+      throw error;
+    }
   }
 }

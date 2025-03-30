@@ -1,4 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { CreateContractEvent } from '@be/shared';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import Web3, { Contract } from 'web3';
 import * as TeachMeContract from '../../assets/TeachMeContract.json';
 
@@ -10,9 +12,15 @@ export class BlockchainRepository implements OnModuleInit {
   private readonly maxRetries = 5;
   private readonly retryDelay = 2000; // 2 giây
 
-  constructor() {
-    const rpcUrl = process.env.ETH_RPC_URL;
-    this.web3 = new Web3(rpcUrl);
+  constructor(
+    @Inject('BLOCKCHAIN_CONTRACT_SERVICE')
+    private readonly contractClient: ClientProxy,
+    @Inject('BLOCKCHAIN_CLASS_SERVICE')
+    private readonly classClient: ClientProxy
+  ) {
+    const wsUrl = process.env.ETH_WS_URL;
+
+    this.web3 = new Web3(wsUrl);
     this.contract = new this.web3.eth.Contract(
       TeachMeContract.abi,
       process.env.CONTRACT_ADDRESS
@@ -21,6 +29,7 @@ export class BlockchainRepository implements OnModuleInit {
 
   async onModuleInit() {
     await this.connectWithRetry(0);
+    this.listenToContractEvents();
   }
 
   private async connectWithRetry(retryCount: number) {
@@ -42,6 +51,68 @@ export class BlockchainRepository implements OnModuleInit {
         );
         throw error;
       }
+    }
+  }
+
+  private async listenToContractEvents() {
+    this.logger.log('Bắt đầu lắng nghe sự kiện ContractCreated...');
+
+    const subscription = this.contract.events.ContractCreated({
+      fromBlock: 'latest',
+    });
+
+    subscription.on('data', (event) => {
+      const returnValues = event.returnValues;
+      const data: CreateContractEvent = {
+        contractId: returnValues.id as string,
+        studentId: returnValues.studentId as string,
+        tutorId: returnValues.tutorId as string,
+        classId: returnValues.classId as string,
+        startDate: Number(returnValues.startDate),
+        endDate: Number(returnValues.endDate),
+        depositAmount: Number(returnValues.depositAmount),
+        totalAmount: Number(returnValues.totalAmount),
+        feePerSession: Number(returnValues.feePerSession),
+        feePerHour: Number(returnValues.feePerHour),
+        totalFee: Number(returnValues.totalFee),
+        grade: returnValues.grade as string,
+        subject: returnValues.subject as string,
+        mode: returnValues.mode as boolean,
+      };
+
+      this.logger.log(
+        `Nhận được sự kiện ContractCreated mới: ${JSON.stringify(data)}`
+      );
+
+      this.contractClient.emit('contract.created', data).subscribe({
+        next: () => this.logger.log('Event đã được publish thành công'),
+        error: (error) => this.logger.error('Lỗi khi publish event:', error),
+      });
+
+      this.classClient.emit('contract.created', data).subscribe({
+        next: () => this.logger.log('Event đã được publish thành công'),
+        error: (error) => this.logger.error('Lỗi khi publish event:', error),
+      });
+    });
+
+    subscription.on('error', (error) => {
+      this.logger.error('Lỗi khi lắng nghe sự kiện ContractCreated:', error);
+    });
+  }
+
+  async checkPastEvents() {
+    try {
+      const events = await this.contract.getPastEvents('ALLEVENTS', {
+        fromBlock: 0,
+        toBlock: 'latest',
+      });
+      this.logger.log(
+        `Tìm thấy ${events.length} sự kiện ContractCreated trong quá khứ`
+      );
+      return events;
+    } catch (error) {
+      this.logger.error('Lỗi khi truy vấn sự kiện trong quá khứ:', error);
+      throw error;
     }
   }
 

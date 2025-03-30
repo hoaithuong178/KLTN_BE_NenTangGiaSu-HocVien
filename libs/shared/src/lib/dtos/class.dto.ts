@@ -20,6 +20,14 @@ export type ClassDetail = Class & {
 
 export class CreateClassRequest {
   @IsString({
+    message: 'id: ID không hợp lệ',
+  })
+  @IsNotEmpty({
+    message: 'id: ID không được để trống',
+  })
+  id!: string;
+
+  @IsString({
     message: 'studentId: ID học sinh không hợp lệ',
   })
   @IsNotEmpty({
