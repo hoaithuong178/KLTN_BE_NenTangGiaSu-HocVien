@@ -30,6 +30,7 @@ model Contract {
   endDate       DateTime       @map("end_date")
   endDateActual DateTime       @map("end_date_actual")
   depositAmount Float          @map("deposit_amount")
+  totalAmount   Float          @map("total_amount")
   feePerSession Float          @map("fee_per_session")
   status        ContractStatus @default(PENDING)
   createdAt     DateTime       @default(now()) @map("created_at")

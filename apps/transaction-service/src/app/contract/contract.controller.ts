@@ -22,6 +22,14 @@ export class ContractController {
         `Class Controller nhận được sự kiện contract: ${JSON.stringify(event)}`
       );
 
+      if (
+        event.contractId.startsWith('contract_') ||
+        event.studentId.startsWith('student_')
+      ) {
+        channel.ack(originalMsg);
+        return;
+      }
+
       const contract = await this.contractService.findById(event.contractId);
 
       if (contract) {

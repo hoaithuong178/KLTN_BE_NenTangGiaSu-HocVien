@@ -95,6 +95,7 @@ model Class {
   feePerSession Float        @map("fee_per_session")
   totalFee      Float        @map("total_fee")
   status        ClassStatus  @default(PENDING)
+  grade         Grade        @map("grade")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   mode          Boolean

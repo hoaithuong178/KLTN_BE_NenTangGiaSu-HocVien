@@ -1,4 +1,5 @@
 import {
+  Grade,
   Class,
   ClassStatus,
   SubjectClass,
@@ -121,4 +122,5 @@ export class CreateClass {
   feePerSession!: number;
   totalFee!: number;
   mode!: boolean;
+  grade!: Grade;
 }

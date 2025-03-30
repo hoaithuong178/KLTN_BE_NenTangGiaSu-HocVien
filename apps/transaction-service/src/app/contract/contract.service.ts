@@ -30,6 +30,7 @@ export class ContractService {
         startDate: new Date(data.startDate * 1000),
         studentId: data.studentId,
         tutorId: data.tutorId,
+        totalAmount: data.totalAmount,
       });
 
       return createdClass;

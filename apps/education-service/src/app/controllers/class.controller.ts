@@ -79,7 +79,10 @@ export class ClassController {
         `Class Controller nhận được sự kiện contract: ${JSON.stringify(event)}`
       );
 
-      if (event.contractId.startsWith('contract_')) {
+      if (
+        event.contractId.startsWith('contract_') ||
+        event.studentId.startsWith('student_')
+      ) {
         channel.ack(originalMsg);
         return;
       }

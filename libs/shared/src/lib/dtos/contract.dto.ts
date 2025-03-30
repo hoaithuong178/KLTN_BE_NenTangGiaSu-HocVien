@@ -6,5 +6,6 @@ export class CreateContract {
   startDate!: Date;
   endDate!: Date;
   depositAmount!: number;
+  totalAmount!: number;
   feePerSession!: number;
 }

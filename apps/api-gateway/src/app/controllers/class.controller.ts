@@ -1,9 +1,5 @@
 import { Role } from '.prisma/user-service';
-import {
-  AuthRequest,
-  CreateClassRequest,
-  UpdateClassRequest,
-} from '@be/shared';
+import { AuthRequest, UpdateClassRequest } from '@be/shared';
 import {
   BadRequestException,
   Body,
@@ -12,7 +8,6 @@ import {
   Get,
   Logger,
   Param,
-  Post,
   Put,
   Request,
   UnauthorizedException,
@@ -28,22 +23,6 @@ export class ClassController {
   private readonly logger: Logger = new Logger(ClassController.name);
 
   constructor(private readonly classService: ClassService) {}
-
-  @Post()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles([Role.STUDENT, Role.TUTOR])
-  async createClass(
-    @Body() data: CreateClassRequest,
-    @Request() req: AuthRequest
-  ) {
-    this.logger.log(`Create class with data: ${JSON.stringify(data)}`);
-
-    if (![data.studentId, data.tutorId].includes(req.user.id)) {
-      throw new UnauthorizedException('Bạn không có quyền tạo lớp học');
-    }
-
-    return this.classService.createClass(data);
-  }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)

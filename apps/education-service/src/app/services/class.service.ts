@@ -293,6 +293,7 @@ export class ClassService {
         feePerSession: data.feePerSession,
         totalFee: data.totalAmount,
         mode: data.mode,
+        grade: data.grade,
       });
 
       return createdClass;

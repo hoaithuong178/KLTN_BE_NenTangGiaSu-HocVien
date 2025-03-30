@@ -15,6 +15,7 @@ export class ClassRepository {
     return this.prismaService.class.create({
       data: {
         ...data,
+        grade: 'UNIVERSITY',
       },
       include: {
         student: true,
