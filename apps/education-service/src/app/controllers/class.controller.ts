@@ -2,7 +2,9 @@ import { Class, ClassStatus } from '.prisma/education-service';
 import {
   BaseResponse,
   CreateClassRequest,
+  CreateContractEvent,
   DeleteClassRequest,
+  ExistedError,
   GetClassByIdRequest,
   UpdateClassRequest,
 } from '@be/shared';
@@ -66,31 +68,35 @@ export class ClassController {
 
   @EventPattern('contract.created')
   async handleContractCreated(
-    @Payload() event: any,
+    @Payload() event: CreateContractEvent,
     @Ctx() context: RmqContext
   ) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
 
     try {
-      this.logger.log('Class Controller nhận được sự kiện contract:', event);
+      this.logger.log(
+        `Class Controller nhận được sự kiện contract: ${JSON.stringify(event)}`
+      );
 
-      // const data: CreateClassRequest = {
-      //   id:
-      // }
+      if (event.contractId.startsWith('contract_')) {
+        channel.ack(originalMsg);
+        return;
+      }
 
-      // const createdClass = await this.classService.createClass(data)
+      await this.classService.createClassFromContract(event);
 
       channel.ack(originalMsg);
       return event;
     } catch (error) {
       this.logger.error(
-        'Class Controller - Lỗi khi xử lý contract event:',
-        error
+        `Class Controller - Lỗi khi xử lý contract event: ${JSON.stringify(
+          error
+        )}`
       );
 
-      // Từ chối message và yêu cầu requeue
-      channel.nack(originalMsg, false, true);
+      if (error instanceof ExistedError) channel.ack(originalMsg);
+      else channel.nack(originalMsg, false, true);
 
       throw error;
     }

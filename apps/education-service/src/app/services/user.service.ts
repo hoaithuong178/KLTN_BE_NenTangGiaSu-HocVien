@@ -18,7 +18,15 @@ export class UserService {
 
   createUser(data: User) {
     this.logger.log('Creating user with data: ' + JSON.stringify(data));
-    return this.userRepository.createUser(data);
+    return this.userRepository.createUser({
+      id: data.id,
+      email: data.email,
+      name: data.name,
+      avatar: data.avatar ?? '',
+      phone: data.phone,
+      password: data.password,
+      role: data.role,
+    } as User);
   }
 
   async updateAvatar(userId: string, avatar: string) {

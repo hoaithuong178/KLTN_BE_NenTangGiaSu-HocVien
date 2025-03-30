@@ -112,3 +112,13 @@ export interface SearchClassRequest {
   page?: number;
   limit?: number;
 }
+
+export class CreateClass {
+  id!: string;
+  studentId!: string;
+  tutorId!: string;
+  subject!: SubjectClass;
+  feePerSession!: number;
+  totalFee!: number;
+  mode!: boolean;
+}

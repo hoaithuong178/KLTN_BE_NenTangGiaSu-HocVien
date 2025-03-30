@@ -1,6 +1,7 @@
 export * from './lib/dtos/auth.dto';
 export * from './lib/dtos/blockchain.dto';
 export * from './lib/dtos/class.dto';
+export * from './lib/dtos/contract.dto';
 export * from './lib/dtos/conversation.dto';
 export * from './lib/dtos/message.dto';
 export * from './lib/dtos/notification.dto';

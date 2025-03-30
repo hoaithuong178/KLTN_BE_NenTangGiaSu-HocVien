@@ -1,3 +1,4 @@
+import { CreateContractEvent, ExistedError } from '@be/shared';
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { ContractService } from './contract.service';
@@ -10,20 +11,24 @@ export class ContractController {
 
   @EventPattern('contract.created')
   async handleContractCreated(
-    @Payload() event: any,
+    @Payload() event: CreateContractEvent,
     @Ctx() context: RmqContext
   ) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
 
     try {
-      this.logger.log('Class Controller nhận được sự kiện contract:', event);
+      this.logger.log(
+        `Class Controller nhận được sự kiện contract: ${JSON.stringify(event)}`
+      );
 
-      // const data: CreateClassRequest = {
-      //   id:
-      // }
+      const contract = await this.contractService.findById(event.contractId);
 
-      // const createdClass = await this.classService.createClass(data)
+      if (contract) {
+        throw new ExistedError('Hợp đồng đã tồn tại');
+      }
+
+      await this.contractService.createContract(event);
 
       channel.ack(originalMsg);
       return event;
@@ -33,8 +38,8 @@ export class ContractController {
         error
       );
 
-      // Từ chối message và yêu cầu requeue
-      channel.nack(originalMsg, false, true);
+      if (error instanceof ExistedError) channel.ack(originalMsg);
+      else channel.nack(originalMsg, false, true);
 
       throw error;
     }

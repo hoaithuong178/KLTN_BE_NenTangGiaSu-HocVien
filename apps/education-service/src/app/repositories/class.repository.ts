@@ -1,5 +1,9 @@
 import { ClassStatus } from '.prisma/education-service';
-import { CreateClassRequest, UpdateClassRequest } from '@be/shared';
+import {
+  CreateClass,
+  CreateClassRequest,
+  UpdateClassRequest,
+} from '@be/shared';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -70,6 +74,12 @@ export class ClassRepository {
   delete(id: string, userId: string) {
     return this.prismaService.class.delete({
       where: { id, OR: [{ studentId: userId }, { tutorId: userId }] },
+    });
+  }
+
+  createClass(data: CreateClass) {
+    return this.prismaService.class.create({
+      data,
     });
   }
 }
