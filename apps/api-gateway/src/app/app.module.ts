@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AuthController } from './controllers/auth.controller';
 import { BlockchainController } from './controllers/blockchain.controller';
 import { ChatController } from './controllers/chat.controller';
+import { ChatbotController } from './controllers/chatbot.controller';
 import { ClassController } from './controllers/class.controller';
 import { ClassPatternController } from './controllers/classPattern.controller';
 import { ContractController } from './controllers/contract.controller';
@@ -25,9 +26,11 @@ import { TutorController } from './controllers/tutor.controller';
 import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { ViolateController } from './controllers/violate.controller';
+import { ChatbotRepository } from './repositories/chatbot.repository';
 import { AuthService } from './services/auth.service';
 import { BlockchainService } from './services/blockchain.service';
 import { ChatService } from './services/chat.service';
+import { ChatbotService } from './services/chatbot.service';
 import { ClassService } from './services/class.service';
 import { ClassPatternService } from './services/classPattern.service';
 import { ContractService } from './services/contract.service';
@@ -91,6 +94,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     LessonPatternController,
     BlockchainController,
     ViolateController,
+    ChatbotController,
   ],
   providers: [
     AuthService,
@@ -111,6 +115,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     LessonPatternService,
     BlockchainService,
     ViolateService,
+    ChatbotService,
+    ChatbotRepository,
   ],
 })
 export class AppModule {}
