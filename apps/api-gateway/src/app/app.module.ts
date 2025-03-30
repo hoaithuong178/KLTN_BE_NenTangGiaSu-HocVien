@@ -19,6 +19,7 @@ import { LessonPatternController } from './controllers/lessonPattern.controller'
 import { NotificationController } from './controllers/notification.controller';
 import { PaymentController } from './controllers/payment.controller';
 import { PostController } from './controllers/post.controller';
+import { RecommendController } from './controllers/recommend.controller';
 import { RequestController } from './controllers/request.controller';
 import { SubjectController } from './controllers/subject.controller';
 import { TimeSlotController } from './controllers/timeSlot.controller';
@@ -27,6 +28,7 @@ import { UserController } from './controllers/user.controller';
 import { UserProfileController } from './controllers/userProfile.controller';
 import { ViolateController } from './controllers/violate.controller';
 import { ChatbotRepository } from './repositories/chatbot.repository';
+import { RecommendRepository } from './repositories/recommend.repository';
 import { AuthService } from './services/auth.service';
 import { BlockchainService } from './services/blockchain.service';
 import { ChatService } from './services/chat.service';
@@ -39,6 +41,7 @@ import { LessonPatternService } from './services/lessonPattern.service';
 import { NotificationService } from './services/notification.service';
 import { PaymentService } from './services/payment.service';
 import { PostService } from './services/post.service';
+import { RecommendService } from './services/recommend.service';
 import { RequestService } from './services/request.service';
 import { SubjectService } from './services/subject.service';
 import { TimeSlotService } from './services/timeSlot.service';
@@ -95,6 +98,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     BlockchainController,
     ViolateController,
     ChatbotController,
+    RecommendController,
   ],
   providers: [
     AuthService,
@@ -117,6 +121,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ViolateService,
     ChatbotService,
     ChatbotRepository,
+    RecommendService,
+    RecommendRepository,
   ],
 })
 export class AppModule {}
