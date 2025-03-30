@@ -1,3 +1,4 @@
+import { Grade } from '.prisma/education-service';
 import { CreateContractEvent } from '@be/shared';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -75,7 +76,7 @@ export class BlockchainRepository implements OnModuleInit {
         feePerSession: Number(returnValues.feePerSession),
         feePerHour: Number(returnValues.feePerHour),
         totalFee: Number(returnValues.totalFee),
-        grade: returnValues.grade as string,
+        grade: returnValues.grade as Grade,
         subject: returnValues.subject as string,
         mode: returnValues.mode as boolean,
       };

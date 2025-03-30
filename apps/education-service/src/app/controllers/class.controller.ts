@@ -81,13 +81,16 @@ export class ClassController {
 
       // const createdClass = await this.classService.createClass(data)
 
-      // Đánh dấu message đã được xử lý thành công
+      channel.ack(originalMsg);
       return event;
     } catch (error) {
       this.logger.error(
         'Class Controller - Lỗi khi xử lý contract event:',
         error
       );
+
+      // Từ chối message và yêu cầu requeue
+      channel.nack(originalMsg, false, true);
 
       throw error;
     }

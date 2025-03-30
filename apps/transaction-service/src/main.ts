@@ -40,7 +40,8 @@ async function bootstrap() {
       options: {
         urls: [RABBIT_MQ_URL],
         queue: 'blockchain_contract_queue',
-        queueOptions: { durable: false },
+        queueOptions: { durable: true },
+        noAck: false,
       },
     }
   );

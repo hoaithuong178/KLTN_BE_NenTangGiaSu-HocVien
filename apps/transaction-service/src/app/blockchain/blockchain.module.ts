@@ -21,7 +21,10 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     options: {
       urls: [RABBIT_MQ_URL],
       queue: `${name.toLowerCase()}_queue`,
-      queueOptions: { durable: false },
+      queueOptions: {
+        durable: true, // Thay đổi từ false thành true
+      },
+      persistent: true,
     },
   }));
 };

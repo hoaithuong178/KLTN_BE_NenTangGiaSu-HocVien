@@ -1,3 +1,5 @@
+import { Grade } from '.prisma/education-service';
+
 export class CreateContractEvent {
   contractId!: string;
   studentId!: string;
@@ -10,7 +12,7 @@ export class CreateContractEvent {
   feePerSession!: number;
   feePerHour!: number;
   totalFee!: number;
-  grade!: string;
+  grade!: Grade;
   subject!: string;
   mode!: boolean;
 }

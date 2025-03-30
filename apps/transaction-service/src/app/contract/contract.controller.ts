@@ -17,7 +17,7 @@ export class ContractController {
     const originalMsg = context.getMessage();
 
     try {
-      this.logger.log('Contract Controller nhận được sự kiện contract:', event);
+      this.logger.log('Class Controller nhận được sự kiện contract:', event);
 
       // const data: CreateClassRequest = {
       //   id:
@@ -25,13 +25,16 @@ export class ContractController {
 
       // const createdClass = await this.classService.createClass(data)
 
-      // Đánh dấu message đã được xử lý thành công
+      channel.ack(originalMsg);
       return event;
     } catch (error) {
       this.logger.error(
-        'Contract Controller - Lỗi khi xử lý contract event:',
+        'Class Controller - Lỗi khi xử lý contract event:',
         error
       );
+
+      // Từ chối message và yêu cầu requeue
+      channel.nack(originalMsg, false, true);
 
       throw error;
     }
