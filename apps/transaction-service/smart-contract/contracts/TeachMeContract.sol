@@ -212,8 +212,7 @@ contract TeachMeContract {
                 keccak256(abi.encodePacked(contractToUpdate.studentId))
             ) {
                 require(
-                    _newStatus == ContractStatus.ACTIVE ||
-                        _newStatus == ContractStatus.CANCELLED,
+                    _newStatus == ContractStatus.CANCELLED,
                     unicode'Học sinh chỉ có thể chuyển trạng thái từ PENDING sang ACTIVE hoặc CANCELLED'
                 );
             }

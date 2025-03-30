@@ -10,4 +10,9 @@ export class BlockchainController {
   async getBalance(@Payload() address: string) {
     return this.blockchainService.getBalance(address);
   }
+
+  @MessagePattern({ cmd: 'get_coin_price' })
+  async getCoinPrice() {
+    return this.blockchainService.getCoinPrice();
+  }
 }

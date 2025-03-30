@@ -276,29 +276,25 @@ export class ClassService {
       `Class Service - Creating class from contract: ${JSON.stringify(data)}`
     );
 
-    try {
-      const classData = await this.classRepository.findById(data.classId);
+    const classData = await this.classRepository.findById(data.classId);
 
-      if (classData) {
-        throw new ExistedError('Lớp học đã tồn tại');
-      }
-
-      const subject = await this.subjectRepository.findById(data.subject);
-
-      const createdClass = await this.classRepository.createClass({
-        id: data.classId,
-        studentId: data.studentId,
-        tutorId: data.tutorId,
-        subject,
-        feePerSession: data.feePerSession,
-        totalFee: data.totalAmount,
-        mode: data.mode,
-        grade: data.grade,
-      });
-
-      return createdClass;
-    } catch (error) {
-      throw new RpcException(error.message || 'Lỗi khi tạo lớp học từ sự kiện');
+    if (classData) {
+      throw new ExistedError('Lớp học đã tồn tại');
     }
+
+    const subject = await this.subjectRepository.findById(data.subject);
+
+    const createdClass = await this.classRepository.createClass({
+      id: data.classId,
+      studentId: data.studentId,
+      tutorId: data.tutorId,
+      subject,
+      feePerSession: data.feePerSession,
+      totalFee: data.totalAmount,
+      mode: data.mode,
+      grade: data.grade,
+    });
+
+    return createdClass;
   }
 }

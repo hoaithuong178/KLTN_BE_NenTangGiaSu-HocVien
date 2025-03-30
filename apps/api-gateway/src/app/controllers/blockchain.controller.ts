@@ -12,4 +12,9 @@ export class BlockchainController {
     this.logger.log(`Getting balance for address: ${address}`);
     return this.blockchainService.getBalance(address);
   }
+
+  @Get('coin-price')
+  async getCoinPrice() {
+    return this.blockchainService.getCoinPrice();
+  }
 }

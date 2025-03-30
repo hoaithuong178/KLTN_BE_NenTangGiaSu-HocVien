@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
+import Redis from './app/configs/redis.config';
 import { ContractModule } from './app/contract/contract.module';
 import { HealthModule } from './app/health/health.module';
 
@@ -32,6 +33,9 @@ async function bootstrap() {
   );
 
   await app.listen();
+
+  await Redis.getInstance().getClient().connect();
+  logger.log('Connected to Redis');
 
   const contractApp = await NestFactory.createMicroservice<MicroserviceOptions>(
     ContractModule,

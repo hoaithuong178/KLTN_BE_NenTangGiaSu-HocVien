@@ -14,4 +14,10 @@ export class BlockchainService {
       this.transactionService.send({ cmd: 'get_balance' }, address)
     );
   }
+
+  getCoinPrice() {
+    return lastValueFrom(
+      this.transactionService.send({ cmd: 'get_coin_price' }, {})
+    );
+  }
 }

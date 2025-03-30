@@ -1,7 +1,7 @@
 import { Grade } from '.prisma/education-service';
 import { CreateContractEvent } from '@be/shared';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import Web3, { Contract } from 'web3';
 import * as TeachMeContract from '../../assets/TeachMeContract.json';
 
@@ -120,5 +120,40 @@ export class BlockchainRepository implements OnModuleInit {
   async getBalance(address: string) {
     const balance = await this.web3.eth.getBalance(address);
     return this.web3.utils.fromWei(balance, 'ether');
+  }
+
+  async getETHFromBitGet() {
+    const response = await fetch(process.env.BIT_GET_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fiat: 'VND',
+        includeFiatRate: true,
+        languageType: 0,
+        name: 'Ethereum',
+        normalizedName: 'ethereum',
+      }),
+    });
+
+    if (!response.ok) throw new RpcException('Error getETHFromBitGet');
+
+    const result = await response.json();
+    const price = Math.round(
+      result.data.fiatExchangeRate.usdRate * result.data.price
+    );
+
+    return price;
+  }
+
+  async getETHFromBitKan() {
+    const response = await fetch(process.env.BIT_KAN_API);
+
+    if (!response.ok) throw new RpcException('Error getETHFromBitKan');
+
+    const result = await response.json();
+
+    return (1 / result.data.ETH) * result.data.VND;
   }
 }
