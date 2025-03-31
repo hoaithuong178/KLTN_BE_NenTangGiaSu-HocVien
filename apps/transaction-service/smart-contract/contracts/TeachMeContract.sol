@@ -64,6 +64,7 @@ contract TeachMeContract {
         uint256 feePerHour;
         uint256 totalFee;
         bool mode;
+        string[] schedules;
     }
 
     mapping(string => Contract) public contracts; // mapping từ id hợp đồng đến hợp đồng
@@ -84,7 +85,8 @@ contract TeachMeContract {
         string subject,
         uint256 feePerHour,
         uint256 totalFee,
-        bool mode
+        bool mode,
+        string[] schedules
     );
 
     event ContractStatusUpdated(
@@ -193,7 +195,8 @@ contract TeachMeContract {
             extraParams.subject,
             extraParams.feePerHour,
             extraParams.totalFee,
-            extraParams.mode
+            extraParams.mode,
+            extraParams.schedules
         );
     }
 
@@ -355,5 +358,64 @@ contract TeachMeContract {
         require(_amount <= address(this).balance, unicode'Số dư không đủ');
         (bool success, ) = owner.call{value: _amount}('');
         require(success, unicode'Chuyển tiền thất bại');
+    }
+
+    function deposit(
+        string memory _contractId,
+        uint256 _ethVndRate
+    ) public payable {
+        Contract storage contractToDeposit = contracts[_contractId];
+
+        // Kiểm tra contract tồn tại và đang ở trạng thái PENDING
+        require(
+            bytes(contractToDeposit.id).length > 0,
+            unicode'Hợp đồng không tồn tại'
+        );
+        require(
+            contractToDeposit.status == ContractStatus.PENDING,
+            unicode'Hợp đồng không ở trạng thái chờ đặt cọc'
+        );
+
+        uint256 _depositAmount = msg.value * _ethVndRate;
+
+        // Kiểm tra số tiền gửi vào
+        require(
+            contractToDeposit.depositAmount == _depositAmount,
+            unicode'Số tiền đặt cọc không khớp với hợp đồng'
+        );
+
+        // Tạo payment record mới
+        string memory paymentId = string(
+            abi.encodePacked(_contractId, '-deposit')
+        );
+
+        Payment storage newPayment = payments[paymentId];
+        newPayment.id = paymentId;
+        newPayment.amount = msg.value;
+        newPayment.timestamp = block.timestamp;
+        newPayment.paymentType = PaymentType.DEPOSIT;
+        newPayment.paymentStatus = PaymentStatus.SUCCESS;
+
+        // Thêm payment vào contract
+        contractToPayments[_contractId].push(paymentId);
+
+        // Chuyển trạng thái contract sang ACTIVE
+        contractToDeposit.status = ContractStatus.ACTIVE;
+
+        // Emit events
+        emit PaymentAdded(
+            _contractId,
+            paymentId,
+            msg.value,
+            PaymentType.DEPOSIT,
+            PaymentStatus.SUCCESS
+        );
+
+        emit ContractStatusUpdated(
+            _contractId,
+            ContractStatus.PENDING,
+            ContractStatus.ACTIVE,
+            msg.sender
+        );
     }
 }

@@ -96,6 +96,7 @@ model Class {
   totalFee      Float        @map("total_fee")
   status        ClassStatus  @default(PENDING)
   grade         Grade        @map("grade")
+  schedules     String[]     @default([]) @map("schedules")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   mode          Boolean

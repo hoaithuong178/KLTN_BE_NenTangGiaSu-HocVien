@@ -123,4 +123,5 @@ export class CreateClass {
   totalFee!: number;
   mode!: boolean;
   grade!: Grade;
+  schedules!: string[];
 }

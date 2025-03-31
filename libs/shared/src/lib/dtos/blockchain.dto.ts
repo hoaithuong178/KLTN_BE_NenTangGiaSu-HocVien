@@ -15,4 +15,5 @@ export class CreateContractEvent {
   grade!: Grade;
   subject!: string;
   mode!: boolean;
+  schedules!: string[];
 }

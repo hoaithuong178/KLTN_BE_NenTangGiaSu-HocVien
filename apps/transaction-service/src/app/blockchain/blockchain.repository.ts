@@ -79,6 +79,7 @@ export class BlockchainRepository implements OnModuleInit {
         grade: returnValues.grade as Grade,
         subject: returnValues.subject as string,
         mode: returnValues.mode as boolean,
+        schedules: returnValues.schedules as string[],
       };
 
       this.logger.log(
