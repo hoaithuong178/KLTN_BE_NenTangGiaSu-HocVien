@@ -28,6 +28,12 @@ export class ClassRepository {
   findById(id: string) {
     return this.prismaService.class.findUnique({
       where: { id },
+    });
+  }
+
+  findByIdDetail(id: string) {
+    return this.prismaService.class.findUnique({
+      where: { id },
       include: {
         student: true,
         tutor: true,

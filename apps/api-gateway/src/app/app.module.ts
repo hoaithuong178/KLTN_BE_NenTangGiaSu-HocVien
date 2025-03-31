@@ -15,6 +15,7 @@ import { ClassController } from './controllers/class.controller';
 import { ClassPatternController } from './controllers/classPattern.controller';
 import { ContractController } from './controllers/contract.controller';
 import { FavoritePostController } from './controllers/favoritePost.controller';
+import { LessonController } from './controllers/lesson.controller';
 import { LessonPatternController } from './controllers/lessonPattern.controller';
 import { NotificationController } from './controllers/notification.controller';
 import { PaymentController } from './controllers/payment.controller';
@@ -37,6 +38,7 @@ import { ClassService } from './services/class.service';
 import { ClassPatternService } from './services/classPattern.service';
 import { ContractService } from './services/contract.service';
 import { FavoritePostService } from './services/favoritePost.service';
+import { LessonService } from './services/lesson.service';
 import { LessonPatternService } from './services/lessonPattern.service';
 import { NotificationService } from './services/notification.service';
 import { PaymentService } from './services/payment.service';
@@ -99,6 +101,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ViolateController,
     ChatbotController,
     RecommendController,
+    LessonController,
   ],
   providers: [
     AuthService,
@@ -123,6 +126,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ChatbotRepository,
     RecommendService,
     RecommendRepository,
+    LessonService,
   ],
 })
 export class AppModule {}

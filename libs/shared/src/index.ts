@@ -3,6 +3,7 @@ export * from './lib/dtos/blockchain.dto';
 export * from './lib/dtos/class.dto';
 export * from './lib/dtos/contract.dto';
 export * from './lib/dtos/conversation.dto';
+export * from './lib/dtos/lesson.dto';
 export * from './lib/dtos/message.dto';
 export * from './lib/dtos/notification.dto';
 export * from './lib/dtos/post.dto';

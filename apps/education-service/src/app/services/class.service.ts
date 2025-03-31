@@ -99,7 +99,7 @@ export class ClassService {
   async findById(data: GetClassByIdRequest) {
     this.logger.log('Finding class by id: ' + data.id);
 
-    const foundClass = await this.classRepository.findById(data.id);
+    const foundClass = await this.classRepository.findByIdDetail(data.id);
     if (!foundClass) {
       throw new RpcException({
         statusCode: HttpStatus.NOT_FOUND,

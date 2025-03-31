@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { ClassController } from './controllers/class.controller';
 import { ClassPatternController } from './controllers/classPattern.controller';
 import { FavoritePostController } from './controllers/favoritePost.controller';
+import { LessonController } from './controllers/lesson.controller';
 import { LessonPatternController } from './controllers/lessonPattern.controller';
 import { PostController } from './controllers/post.controller';
 import { RequestController } from './controllers/request.controller';
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ClassRepository } from './repositories/class.repository';
 import { ClassPatternRepository } from './repositories/classPattern.repository';
 import { FavoritePostRepository } from './repositories/favoritePost.repository';
+import { LessonRepository } from './repositories/lesson.repository';
 import { LessonPatternRepository } from './repositories/lessonPattern.repository';
 import { PostRepository } from './repositories/post.repository';
 import { RejectPostRepository } from './repositories/rejectPost.repository';
@@ -29,6 +31,7 @@ import { UserRepository } from './repositories/user.repository';
 import { ClassService } from './services/class.service';
 import { ClassPatternService } from './services/classPattern.service';
 import { FavoritePostService } from './services/favoritePost.service';
+import { LessonService } from './services/lesson.service';
 import { LessonPatternService } from './services/lessonPattern.service';
 import { PostService } from './services/post.service';
 import { RequestService } from './services/request.service';
@@ -70,6 +73,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     FavoritePostController,
     ClassPatternController,
     LessonPatternController,
+    LessonController,
   ],
   providers: [
     AppService,
@@ -92,6 +96,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     LessonPatternService,
     LessonPatternRepository,
     RejectPostRepository,
+    LessonService,
+    LessonRepository,
   ],
 })
 export class AppModule {
