@@ -3,6 +3,7 @@ import { AuthRequest } from '@be/shared';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -54,5 +55,15 @@ export class ChatbotController {
       return await this.chatbotService.getConversationStudent(req.user.id);
 
     return await this.chatbotService.getConversationTutor(req.user.id);
+  }
+
+  @Delete()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.TUTOR, Role.STUDENT])
+  @HttpCode(HttpStatus.OK)
+  async deleteConversation(@Request() req: AuthRequest) {
+    this.logger.log(`Delete conversation: ${req.user.id}`);
+
+    return await this.chatbotService.deleteConversation(req.user.id);
   }
 }

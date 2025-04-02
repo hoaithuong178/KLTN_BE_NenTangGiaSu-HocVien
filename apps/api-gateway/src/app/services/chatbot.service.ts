@@ -60,4 +60,20 @@ export class ChatbotService {
 
     return response;
   }
+
+  async deleteConversation(userId: string) {
+    this.logger.log(`Delete conversation: ${userId}`);
+
+    const res = await Promise.all([
+      this.chatbotRepository.deleteStudentConversation(userId),
+      this.chatbotRepository.deleteTutorConversation(userId),
+    ]);
+
+    const response: BaseResponse<typeof res> = {
+      statusCode: HttpStatus.OK,
+      data: res,
+    };
+
+    return response;
+  }
 }

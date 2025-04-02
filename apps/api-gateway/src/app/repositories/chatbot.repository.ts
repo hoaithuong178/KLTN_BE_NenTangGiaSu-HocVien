@@ -46,4 +46,20 @@ export class ChatbotRepository {
 
     return res.data;
   }
+
+  async deleteStudentConversation(userId: string) {
+    const res = await this.client.delete(`/student/chat/conversations`, {
+      params: { userId },
+    });
+
+    return res.data;
+  }
+
+  async deleteTutorConversation(userId: string) {
+    const res = await this.client.delete(`/tutor/chat/conversations`, {
+      params: { userId },
+    });
+
+    return res.data;
+  }
 }
