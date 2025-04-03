@@ -9,6 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
+import Redis from '../configs/redis.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { TutorRepository } from '../repositories/tutor.repository';
 import { UserRepository } from '../repositories/user.repository';
@@ -225,7 +226,29 @@ export class TutorService {
   async countBySpecializations() {
     this.logger.log('Counting tutors by specializations');
 
+    const cachedData = await Redis.getInstance()
+      .getClient()
+      .get('tutor-specializations');
+
+    if (cachedData)
+      return {
+        statusCode: HttpStatus.OK,
+        data: JSON.parse(cachedData),
+      };
+
     const counts = await this.tutorRepository.countBySpecializations();
+
+    Redis.getInstance()
+      .getClient()
+      .set('tutor-specializations', JSON.stringify(counts), {
+        EX: 60 * 5, // 5 minutes
+      })
+      .then(() => this.logger.log('Counting tutors by specializations cached'))
+      .catch((error) =>
+        this.logger.error(
+          `Error when cache Counting tutors by specializations: ${error.message}`
+        )
+      );
 
     const response: BaseResponse<
       Array<{ specialization: string; count: number }>

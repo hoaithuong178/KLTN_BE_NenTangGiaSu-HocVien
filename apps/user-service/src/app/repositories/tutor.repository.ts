@@ -44,6 +44,11 @@ export class TutorRepository {
       _count: {
         id: true,
       },
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
     });
 
     // Chuyển đổi kết quả thành định dạng phù hợp
