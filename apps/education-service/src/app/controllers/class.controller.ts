@@ -42,6 +42,12 @@ export class ClassController {
     return this.classService.findByUserId(userId);
   }
 
+  @MessagePattern({ cmd: 'get-all-classes' })
+  async getAllClasses(): Promise<BaseResponse<Class[]>> {
+    this.logger.log('Getting all classes');
+    return this.classService.findAll();
+  }
+
   @MessagePattern({ cmd: 'update-class' })
   async updateClass(data: {
     id: string;

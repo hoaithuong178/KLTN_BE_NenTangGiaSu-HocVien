@@ -4,12 +4,14 @@ import {
   GetClassByIdRequest,
   UpdateClassRequest,
 } from '@be/shared';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class ClassService {
+  private readonly logger = new Logger(ClassService.name);
+
   constructor(
     @Inject('EDUCATION_SERVICE') private readonly classService: ClientProxy
   ) {}
@@ -38,5 +40,10 @@ export class ClassService {
 
   deleteClass(data: DeleteClassRequest) {
     return lastValueFrom(this.classService.send({ cmd: 'delete-class' }, data));
+  }
+
+  async findAll() {
+    this.logger.log('Finding all classes');
+    return this.classService.send({ cmd: 'get-all-classes' }, {});
   }
 }

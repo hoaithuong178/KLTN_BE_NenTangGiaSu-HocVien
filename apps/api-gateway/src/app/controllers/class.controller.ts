@@ -32,6 +32,14 @@ export class ClassController {
     return this.classService.findByUserId(req.user.id);
   }
 
+  @Get('all')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
+  async getAllClasses() {
+    this.logger.log('Get all classes');
+    return this.classService.findAll();
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   async getClassById(@Param('id') id: string, @Request() req: AuthRequest) {

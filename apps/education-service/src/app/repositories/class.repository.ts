@@ -56,6 +56,16 @@ export class ClassRepository {
     });
   }
 
+  findAll() {
+    return this.prismaService.class.findMany({
+      include: {
+        student: true,
+        tutor: true,
+        lessons: true,
+      },
+    });
+  }
+
   update(id: string, data: UpdateClassRequest) {
     return this.prismaService.class.update({
       where: { id },

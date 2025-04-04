@@ -141,6 +141,18 @@ export class ClassService {
     return response;
   }
 
+  async findAll() {
+    this.logger.log('Finding all classes');
+
+    const classes = await this.classRepository.findAll();
+
+    const response: BaseResponse<Class[]> = {
+      statusCode: HttpStatus.OK,
+      data: classes.map(this.convertToClassDetail),
+    };
+    return response;
+  }
+
   async update(id: string, data: UpdateClassRequest) {
     this.logger.log('Updating class with data: ' + JSON.stringify(data));
 
