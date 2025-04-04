@@ -1,6 +1,6 @@
 import { LessonStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
-import { CreateLesson, UpdateLesson } from '@be/shared';
+import { AuthRequest, CreateLesson, UpdateLesson } from '@be/shared';
 import {
   Body,
   Controller,
@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../decorators/roles.decorator';
@@ -48,7 +49,7 @@ export class LessonController {
 
   @Put(':id/status')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles([Role.TUTOR])
+  @Roles([Role.TUTOR, Role.STUDENT])
   async updateStatus(
     @Param('id') id: string,
     @Body() data: { status: LessonStatus }
@@ -63,5 +64,20 @@ export class LessonController {
   async delete(@Param('id') id: string) {
     this.logger.log(`Delete lesson ${id}`);
     return this.lessonService.delete(id);
+  }
+
+  @Post(':id/check-in')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles([Role.TUTOR, Role.STUDENT])
+  async checkIn(@Param('id') id: string, @Request() request: AuthRequest) {
+    this.logger.log(
+      `Check-in for lesson ${id} by ${request.user.id} with role ${request.user.role}`
+    );
+
+    return this.lessonService.checkIn({
+      lessonId: id,
+      userId: request.user.id,
+      role: request.user.role as Role,
+    });
   }
 }

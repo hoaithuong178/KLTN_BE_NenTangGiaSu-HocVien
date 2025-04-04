@@ -1,5 +1,5 @@
 import { LessonStatus } from '.prisma/education-service';
-import { CreateLesson, UpdateLesson } from '@be/shared';
+import { CheckInLesson, CreateLesson, UpdateLesson } from '@be/shared';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -30,5 +30,9 @@ export class LessonService {
 
   delete(id: string) {
     return this.educationClient.send({ cmd: 'delete-lesson' }, id);
+  }
+
+  checkIn(data: CheckInLesson) {
+    return this.educationClient.send({ cmd: 'lesson-check-in' }, data);
   }
 }

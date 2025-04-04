@@ -112,6 +112,9 @@ model Class {
 
 enum LessonStatus {
   SCHEDULED
+  TUTOR_MUSTER
+  STUDENT_MUSTER
+  BOTH_MUSTER
   COMPLETED
   CANCELLED
 }

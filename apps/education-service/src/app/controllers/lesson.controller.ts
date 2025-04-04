@@ -32,4 +32,13 @@ export class LessonController {
   delete(id: string) {
     return this.lessonService.delete(id);
   }
+
+  @MessagePattern({ cmd: 'lesson-check-in' })
+  checkIn(data: {
+    lessonId: string;
+    userId: string;
+    role: 'TUTOR' | 'STUDENT';
+  }) {
+    return this.lessonService.checkIn(data);
+  }
 }

@@ -16,12 +16,18 @@ export class LessonRepository {
     });
   }
 
-  findByClassId(classId: string) {
-    return this.prismaService.lesson.findMany({
-      where: { classId, status: LessonStatus.SCHEDULED },
+  findById(id: string) {
+    return this.prismaService.lesson.findUnique({
+      where: { id },
       include: {
         class: true,
       },
+    });
+  }
+
+  findByClassId(classId: string) {
+    return this.prismaService.lesson.findMany({
+      where: { classId },
     });
   }
 

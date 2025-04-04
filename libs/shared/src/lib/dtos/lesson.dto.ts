@@ -1,3 +1,4 @@
+import { Role } from '.prisma/education-service';
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
@@ -49,3 +50,9 @@ export class CreateLesson {
 }
 
 export type UpdateLesson = Partial<Omit<CreateLesson, 'classId'>>;
+
+export class CheckInLesson {
+  lessonId!: string;
+  userId!: string;
+  role!: Role;
+}
