@@ -44,4 +44,25 @@ export class ContractService {
 
     return this.contractRepository.findById(id);
   }
+
+  async findByUserId(userId: string) {
+    this.logger.log(
+      `Contract Service - Finding contracts by user id: ${userId}`
+    );
+
+    try {
+      const contracts = await this.contractRepository.findByUserId(userId);
+      return contracts;
+    } catch (error) {
+      throw new RpcException(
+        error.message || 'Lỗi khi tìm hợp đồng theo người dùng'
+      );
+    }
+  }
+
+  async getAllContracts() {
+    this.logger.log(`Contract Service - Fetching all contracts`);
+
+    return await this.contractRepository.getAllContracts();
+  }
 }

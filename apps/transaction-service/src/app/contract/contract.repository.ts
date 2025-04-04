@@ -22,4 +22,23 @@ export class ContractRepository {
       },
     });
   }
+
+  findByUserId(userId: string) {
+    return this.prisma.contract.findMany({
+      where: {
+        OR: [{ studentId: userId }, { tutorId: userId }],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  getAllContracts() {
+    return this.prisma.contract.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }
