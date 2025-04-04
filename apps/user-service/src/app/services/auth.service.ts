@@ -284,7 +284,20 @@ export class AuthService {
   }
 
   async checkInvalidToken(id: string) {
+    this.logger.log(`Checking invalid token for ${id}`);
+
+    const result = await Redis.getInstance().getClient().get(id);
+
+    if (result) return result === 'true';
+
     const invalidToken = await this.invalidTokenRepository.getInvalidToken(id);
+
+    Redis.getInstance()
+      .getClient()
+      .set(id, invalidToken ? 'true' : '', {
+        EX: 60 * 60 * 24 * 7, // 1 week
+      });
+
     return !!invalidToken;
   }
 }
