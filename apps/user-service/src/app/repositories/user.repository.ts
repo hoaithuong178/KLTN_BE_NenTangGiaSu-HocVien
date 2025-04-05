@@ -107,6 +107,9 @@ export class UserRepository {
         ...(role && { role }),
         ...(status && { status }),
         ...(violate && { violate }),
+        role: {
+          not: 'ADMIN',
+        },
       },
       select: {
         id: true,
