@@ -9,11 +9,8 @@ export class PaymentRepository {
   async findPendingPayments(id: string) {
     return this.prisma.payment.findMany({
       where: {
-        OR: [{ studentId: id }, { tutorId: id }, { contractId: id }],
+        OR: [{ fromId: id }, { toId: id }, { docId: id }],
         status: PaymentStatus.PENDING,
-      },
-      include: {
-        contract: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -24,13 +21,10 @@ export class PaymentRepository {
   async findProcessedPayments(id: string) {
     return this.prisma.payment.findMany({
       where: {
-        OR: [{ studentId: id }, { tutorId: id }, { contractId: id }],
+        OR: [{ fromId: id }, { toId: id }, { docId: id }],
         status: {
           in: [PaymentStatus.SUCCESS, PaymentStatus.FAILED],
         },
-      },
-      include: {
-        contract: true,
       },
       orderBy: {
         createdAt: 'desc',
