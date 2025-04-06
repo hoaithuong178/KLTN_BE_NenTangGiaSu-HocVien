@@ -9,6 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
+import { BenefitController } from './controllers/benefit.controller';
 import { ChatController } from './controllers/chat.controller';
 import { FacebookAuthController } from './controllers/facebookAuth.controller';
 import { GoogleAuthController } from './controllers/googleAuth.controller';
@@ -19,6 +20,7 @@ import { UserProfileController } from './controllers/userProfile.controller';
 import { ViolateController } from './controllers/violate.controller';
 import { ChatGateway } from './gateways/chat.gateway';
 import { PrismaModule } from './prisma/prisma.module';
+import { BenefitRepository } from './repositories/benefit.repository';
 import { ConversationRepository } from './repositories/conversation.repository';
 import { InvalidTokenRepository } from './repositories/invalidToken.repository';
 import { MessageRepository } from './repositories/message.repository';
@@ -28,6 +30,7 @@ import { UserRepository } from './repositories/user.repository';
 import { UserProfileRepository } from './repositories/userProfile.repository';
 import { ViolateRepository } from './repositories/violate.repository';
 import { AuthService } from './services/auth.service';
+import { BenefitService } from './services/benefit.service';
 import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
 import { FacebookAuthService } from './services/facebookAuth.service';
@@ -76,6 +79,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     GoogleAuthController,
     FacebookAuthController,
     ViolateController,
+    BenefitController,
   ],
   providers: [
     AppService,
@@ -98,6 +102,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     FacebookAuthService,
     ViolateService,
     ViolateRepository,
+    BenefitService,
+    BenefitRepository,
   ],
 })
 export class AppModule {

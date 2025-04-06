@@ -72,7 +72,7 @@ export class Register extends CreateUser {
   @IsNotEmpty({
     message: 'otp: OTP không được để trống',
   })
-  @Matches(/^[0-9]{6}$/, {
+  @Matches(/^\d{6}$/, {
     message: 'otp: OTP phải có 6 chữ số',
   })
   otp!: string;

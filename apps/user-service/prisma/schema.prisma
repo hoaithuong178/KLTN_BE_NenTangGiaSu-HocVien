@@ -233,6 +233,7 @@ model Benefit {
   description String?  @map("description")
   quantity    Int      @map("quantity")
   amount      Float    @map("amount")
+  isDeleted   Boolean  @default(false) @map("is_deleted")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

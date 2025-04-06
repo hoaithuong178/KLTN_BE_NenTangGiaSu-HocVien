@@ -1,0 +1,3 @@
+export const PRISMA_ERROR_CODE = {
+  RECORD_UPDATE_NOT_FOUND: 'P2025',
+};

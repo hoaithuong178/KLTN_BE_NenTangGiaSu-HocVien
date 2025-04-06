@@ -1,4 +1,6 @@
+export * from './lib/constants';
 export * from './lib/dtos/auth.dto';
+export * from './lib/dtos/benefit.dto';
 export * from './lib/dtos/blockchain.dto';
 export * from './lib/dtos/class.dto';
 export * from './lib/dtos/contract.dto';
