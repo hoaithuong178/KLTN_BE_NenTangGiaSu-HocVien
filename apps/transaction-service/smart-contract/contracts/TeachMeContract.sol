@@ -14,7 +14,8 @@ contract TeachMeContract {
     }
     enum PaymentType {
         DEPOSIT,
-        FEE_PER_SESSION
+        FEE_PER_SESSION,
+        BENEFIT_PACKAGE
     }
     enum PaymentStatus {
         PENDING,
@@ -67,9 +68,19 @@ contract TeachMeContract {
         string[] schedules;
     }
 
+    struct BenefitPackage {
+        string id;
+        string userId;
+        string benefitId;
+        uint256 amount;
+        uint256 quantity;
+    }
+
     mapping(string => Contract) public contracts; // mapping từ id hợp đồng đến hợp đồng
     mapping(string => Payment) public payments; // mapping từ id payment đến payment
     mapping(string => string[]) contractToPayments; // mapping từ id hợp đồng đến danh sách các payment
+    mapping(string => BenefitPackage) public benefitPackages; // mapping từ id gói benefit đến thông tin gói
+    mapping(string => string[]) userToBenefitPackages; // mapping từ id người dùng đến danh sách các gói benefit
 
     event ContractCreated(
         string id,
@@ -113,6 +124,15 @@ contract TeachMeContract {
         uint256 amount,
         uint256 feePercent,
         uint256 priceVND
+    );
+
+    event BenefitPackagePurchased(
+        string id,
+        string userId,
+        string benefitId,
+        uint256 amount,
+        uint256 quantity,
+        uint256 priceRate
     );
 
     // Thiết lập người deploy contract là owner
@@ -416,6 +436,50 @@ contract TeachMeContract {
             ContractStatus.PENDING,
             ContractStatus.ACTIVE,
             msg.sender
+        );
+    }
+
+    function buyBenefit(
+        string memory _id,
+        string memory _userId,
+        string memory _benefitId,
+        uint256 _quantity,
+        uint256 _priceRate
+    ) public payable {
+        require(msg.value > 0, unicode'Cần gửi một lượng ETH lớn hơn 0');
+
+        // Tạo gói benefit mới
+        BenefitPackage storage newPackage = benefitPackages[_id];
+        newPackage.id = _id;
+        newPackage.userId = _userId;
+        newPackage.benefitId = _benefitId;
+        newPackage.amount = msg.value;
+        newPackage.quantity = _quantity;
+
+        // Thêm gói benefit vào danh sách của người dùng
+        userToBenefitPackages[_userId].push(_id);
+
+        // Tạo payment record mới
+        string memory paymentId = string(abi.encodePacked(_id, '-payment'));
+
+        Payment storage newPayment = payments[paymentId];
+        newPayment.id = paymentId;
+        newPayment.amount = msg.value;
+        newPayment.timestamp = block.timestamp;
+        newPayment.paymentType = PaymentType.BENEFIT_PACKAGE;
+        newPayment.paymentStatus = PaymentStatus.SUCCESS;
+
+        // Chuyển tiền vào ví của owner
+        owner.transfer(msg.value);
+
+        // Emit event
+        emit BenefitPackagePurchased(
+            _id,
+            _userId,
+            _benefitId,
+            msg.value,
+            _quantity,
+            _priceRate
         );
     }
 }

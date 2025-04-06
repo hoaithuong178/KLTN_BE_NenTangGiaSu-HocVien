@@ -226,3 +226,27 @@ model InvalidToken {
 
   @@map("invalid_tokens")
 }
+
+model Benefit {
+  id          String   @id @default(cuid())
+  name        String   @map("name")
+  description String?  @map("description")
+  quantity    Int      @map("quantity")
+  amount      Float    @map("amount")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("benefits")
+}
+
+model BenefitUser {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  benefitId String   @map("benefit_id")
+  quantity  Int      @map("quantity")
+  amount    Float    @map("amount")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("benefit_users")
+}

@@ -35,7 +35,6 @@ model Contract {
   status        ContractStatus @default(PENDING)
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
-  payments      Payment[]
 
   @@map("contracts")
 }
@@ -43,6 +42,7 @@ model Contract {
 enum PaymentType {
   DEPOSIT
   FEE_PER_SESSION
+  BENEFIT
 }
 
 enum PaymentStatus {
@@ -52,19 +52,18 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id         String        @id @default(cuid())
-  contractId String        @map("contract_id")
-  studentId  String        @map("student_id")
-  tutorId    String        @map("tutor_id")
-  amount     Float         @map("amount")
-  amountEth  Float?        @map("amount_eth")
-  fee        Float?        @map("fee")
-  feeEth     Float?        @map("fee_eth")
-  type       PaymentType
-  status     PaymentStatus @default(PENDING)
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @updatedAt @map("updated_at")
-  contract   Contract      @relation(fields: [contractId], references: [id])
+  id        String        @id @default(cuid())
+  fromId    String?       @map("from_id")
+  toId      String?       @map("to_id")
+  docId     String?       @map("doc_id")
+  amount    Float         @map("amount")
+  amountEth Float?        @map("amount_eth")
+  fee       Float?        @map("fee")
+  feeEth    Float?        @map("fee_eth")
+  type      PaymentType
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
 
   @@map("payments")
 }
