@@ -1,6 +1,11 @@
 import { Post, PostStatus } from '.prisma/education-service';
 import { Role } from '.prisma/user-service';
-import { BaseResponse, DeletePostRequest, PostSearchRequest } from '@be/shared';
+import {
+  BaseResponse,
+  DeletePostRequest,
+  PostSearchRequest,
+  PRISMA_ERROR_CODE,
+} from '@be/shared';
 import {
   QueryDslOperator,
   QueryDslQueryContainer,
@@ -107,31 +112,42 @@ export class PostService {
 
   async update(id: string, data: Partial<Post>) {
     this.logger.log('Updating post with data: ' + JSON.stringify(data));
-    const updatedPost = await this.postRepository.update(id, data);
 
-    // Đồng bộ post đã cập nhật vào Elasticsearch
-    elasticClient
-      .update({
-        index: POST_ELASTIC_INDEX,
-        id: id,
-        body: {
-          doc: updatedPost,
-        },
-      })
-      .catch((error) =>
-        this.logger.error(
-          'Lỗi khi đồng bộ post đã cập nhật vào Elasticsearch:',
-          error
-        )
-      );
+    try {
+      const updatedPost = await this.postRepository.update(id, data);
 
-    this.chatbotEducationService.emit('post-updated', updatedPost);
+      // Đồng bộ post đã cập nhật vào Elasticsearch
+      elasticClient
+        .update({
+          index: POST_ELASTIC_INDEX,
+          id: id,
+          body: {
+            doc: updatedPost,
+          },
+        })
+        .catch((error) =>
+          this.logger.error(
+            'Lỗi khi đồng bộ post đã cập nhật vào Elasticsearch:',
+            error
+          )
+        );
 
-    const response: BaseResponse<Post> = {
-      statusCode: HttpStatus.OK,
-      data: updatedPost,
-    };
-    return response;
+      this.chatbotEducationService.emit('post-updated', updatedPost);
+
+      const response: BaseResponse<Post> = {
+        statusCode: HttpStatus.OK,
+        data: updatedPost,
+      };
+      return response;
+    } catch (error) {
+      if (error.code === PRISMA_ERROR_CODE.RECORD_UPDATE_NOT_FOUND) {
+        throw new RpcException({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Không tìm thấy bài viết hoặc bài viết không thuộc về bạn',
+        });
+      }
+      throw error;
+    }
   }
 
   async delete(data: DeletePostRequest) {
