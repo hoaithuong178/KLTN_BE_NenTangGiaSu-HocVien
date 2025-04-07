@@ -20,7 +20,7 @@ import { UserService } from '../services/user.service';
     origin: '*',
   },
   path: '/socket.io',
-  port: process.env.WEBSOCKET_PORT || 4001,
+  port: process.env.PORT || 4001,
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
