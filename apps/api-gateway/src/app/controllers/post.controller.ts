@@ -80,14 +80,12 @@ export class PostController {
   ) {
     this.logger.log(`Update post ${id} with data ${JSON.stringify(data)}`);
 
-    const user = await this.userService.getUserById(req.user.id);
-
     return this.postService.updatePost(id, {
       ...data,
       user: {
         id: req.user.id,
-        name: user.data.name,
-        avatar: user.data.avatar || '',
+        name: '',
+        avatar: '',
       },
     });
   }
