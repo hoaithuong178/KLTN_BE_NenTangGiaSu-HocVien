@@ -27,7 +27,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   private readonly logger = new Logger(ChatGateway.name);
-  private readonly usersOnline: string[] = [];
+  private readonly usersOnline: Set<string> = new Set<string>();
 
   constructor(
     @Inject('CHAT_SERVICE') private readonly chatService: ClientProxy,
@@ -50,10 +50,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (userId) {
       client.join(userId);
-      this.usersOnline.push(userId);
+      this.usersOnline.add(userId);
 
       // send emit to me
-      this.server.to(userId).emit('users_connected', this.usersOnline);
+      this.server
+        .to(userId)
+        .emit('users_connected', Array.from(this.usersOnline));
 
       client.broadcast.emit('user_connected', userId);
 
@@ -69,6 +71,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.handshake.query.userId as string;
 
     this.logger.log(`User disconnected: ${userId}`);
+
+    this.usersOnline.delete(userId);
 
     if (userId) {
       client.leave(userId);
