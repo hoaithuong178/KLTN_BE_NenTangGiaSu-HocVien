@@ -1,3 +1,4 @@
+import { BenefitUser } from '.prisma/user-service';
 import { CreateMessageDto } from '@be/shared';
 import { Inject, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -10,13 +11,15 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { getReceiverId } from '../../utils';
+import Redis from '../configs/redis.config';
+import { BenefitUserService } from '../services/benefitUser.service';
 import { UserService } from '../services/user.service';
 
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
-  namespace: '/chat',
+  path: '/socket.io/chat',
   transports: ['websocket'],
   port: process.env.WEBSOCKET_PORT || 4001,
 })
@@ -28,7 +31,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     @Inject('CHAT_SERVICE') private readonly chatService: ClientProxy,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly benefitUserService: BenefitUserService
   ) {}
 
   afterInit() {
@@ -82,9 +86,77 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(client: Socket, payload: CreateMessageDto) {
     this.logger.log(`Received message: ${JSON.stringify(payload)}`);
 
+    const USER_BENEFIT_KEY = `user-benefit::${payload.senderId}`;
+
+    let userBenefit: string | BenefitUser = await Redis.getInstance()
+      .getClient()
+      .get(USER_BENEFIT_KEY);
+
+    if (!userBenefit) {
+      userBenefit = await this.benefitUserService.getUserBenefit(
+        payload.senderId
+      );
+
+      Redis.getInstance()
+        .getClient()
+        .set(USER_BENEFIT_KEY, JSON.stringify(userBenefit))
+        .then(() => {
+          this.logger.log(`User benefit for ${payload.senderId} set to Redis`);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Error setting user benefit for ${payload.senderId}: ${error}`
+          );
+        });
+    } else {
+      userBenefit = JSON.parse(userBenefit);
+    }
+
     const receiverId = getReceiverId(payload.conversationId, payload.senderId);
+
+    if (
+      !userBenefit ||
+      (typeof userBenefit === 'object' &&
+        userBenefit.remaining <= 0 &&
+        !userBenefit.connectedUserIds.includes(receiverId))
+    ) {
+      this.server
+        .to(payload.senderId)
+        .emit('user_benefit_exceeded', receiverId);
+      return;
+    }
 
     this.chatService.emit('send_message', payload);
     this.server.to(receiverId).emit('receive_message', payload);
+
+    this.chatService.emit('connect_user', {
+      fromUserId: payload.senderId,
+      toUserId: receiverId,
+    });
+
+    Redis.getInstance()
+      .getClient()
+      .set(
+        USER_BENEFIT_KEY,
+        JSON.stringify(
+          typeof userBenefit === 'object'
+            ? {
+                ...userBenefit,
+                remaining: userBenefit.remaining - 1,
+                connectedUserIds: [...userBenefit.connectedUserIds, receiverId],
+              }
+            : {}
+        )
+      )
+      .then(() => {
+        this.logger.log(
+          `User benefit for ${payload.senderId} updated to Redis`
+        );
+      })
+      .catch((error) => {
+        this.logger.error(
+          `Error updating user benefit for ${payload.senderId}: ${error}`
+        );
+      });
   }
 }

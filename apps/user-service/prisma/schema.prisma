@@ -241,13 +241,12 @@ model Benefit {
 }
 
 model BenefitUser {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  benefitId String   @map("benefit_id")
-  quantity  Int      @map("quantity")
-  amount    Float    @map("amount")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  remaining        Int      @map("remaining")
+  connectedUserIds String[] @default([]) @map("connected_user_ids")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   @@map("benefit_users")
 }

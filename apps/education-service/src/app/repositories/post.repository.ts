@@ -58,6 +58,7 @@ export class PostRepository {
       data: {
         ...data,
         postTime: data.postTime ? new Date(data.postTime) : undefined,
+        status: 'PENDING',
       },
     });
   }

@@ -21,6 +21,7 @@ import { ViolateController } from './controllers/violate.controller';
 import { ChatGateway } from './gateways/chat.gateway';
 import { PrismaModule } from './prisma/prisma.module';
 import { BenefitRepository } from './repositories/benefit.repository';
+import { BenefitUserRepository } from './repositories/benefitUser.repository';
 import { ConversationRepository } from './repositories/conversation.repository';
 import { InvalidTokenRepository } from './repositories/invalidToken.repository';
 import { MessageRepository } from './repositories/message.repository';
@@ -31,6 +32,7 @@ import { UserProfileRepository } from './repositories/userProfile.repository';
 import { ViolateRepository } from './repositories/violate.repository';
 import { AuthService } from './services/auth.service';
 import { BenefitService } from './services/benefit.service';
+import { BenefitUserService } from './services/benefitUser.service';
 import { ChatService } from './services/chat.service';
 import { CleanupTokenService } from './services/cleanupToken.service';
 import { FacebookAuthService } from './services/facebookAuth.service';
@@ -104,6 +106,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     ViolateRepository,
     BenefitService,
     BenefitRepository,
+    BenefitUserService,
+    BenefitUserRepository,
   ],
 })
 export class AppModule {

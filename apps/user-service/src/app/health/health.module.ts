@@ -6,9 +6,11 @@ import {
 } from '@nestjs/microservices';
 import { ChatGateway } from '../gateways/chat.gateway';
 import { PrismaService } from '../prisma/prisma.service';
+import { BenefitUserRepository } from '../repositories/benefitUser.repository';
 import { ConversationRepository } from '../repositories/conversation.repository';
 import { MessageRepository } from '../repositories/message.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { BenefitUserService } from '../services/benefitUser.service';
 import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
 import { HealthController } from './health.controller';
@@ -42,6 +44,8 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     MessageRepository,
     UserRepository,
     UserService,
+    BenefitUserService,
+    BenefitUserRepository,
   ],
 })
 export class HealthModule {}
