@@ -62,6 +62,13 @@ export class PostRepository {
     });
   }
 
+  updateStatus(id: string, status: PostStatus) {
+    return this.prismaService.post.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
   delete(id: string) {
     return this.prismaService.post.delete({
       where: { id },

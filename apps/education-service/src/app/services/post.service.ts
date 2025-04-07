@@ -363,9 +363,10 @@ export class PostService {
 
   async approve(id: string) {
     this.logger.log('Approving post with ID: ' + id);
-    const updatedPost = await this.postRepository.update(id, {
-      status: PostStatus.APPROVED,
-    });
+    const updatedPost = await this.postRepository.updateStatus(
+      id,
+      PostStatus.APPROVED
+    );
 
     // Đồng bộ post đã cập nhật vào Elasticsearch
     elasticClient
@@ -396,9 +397,7 @@ export class PostService {
     this.logger.log(`Rejecting post ${id} with reason: ${reason}`);
 
     const [updatedPost] = await this.prismaService.$transaction([
-      this.postRepository.update(id, {
-        status: PostStatus.REJECTED,
-      }),
+      this.postRepository.updateStatus(id, PostStatus.REJECTED),
       this.rejectPostRepository.create({
         postId: id,
         reason,
