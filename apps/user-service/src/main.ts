@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app/app.module';
 import elasticClient from './app/configs/elastic.config';
@@ -60,6 +61,12 @@ async function bootstrap() {
   }
 
   const httpApp = await NestFactory.create(HealthModule);
+
+  httpApp.enableCors({
+    origin: '*',
+  });
+  httpApp.useWebSocketAdapter(new IoAdapter(httpApp));
+
   const port = process.env.PORT || 4001;
   await httpApp.listen(port);
   logger.log(`HTTP server listening on port ${port}`);
