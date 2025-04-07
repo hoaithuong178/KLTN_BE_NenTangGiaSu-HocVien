@@ -19,8 +19,7 @@ import { UserService } from '../services/user.service';
   cors: {
     origin: '*',
   },
-  path: '/socket.io/chat',
-  transports: ['websocket'],
+  path: '/socket.io',
   port: process.env.WEBSOCKET_PORT || 4001,
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
