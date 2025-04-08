@@ -1,4 +1,3 @@
-import { BenefitUser } from '.prisma/user-service';
 import { CreateMessageDto } from '@be/shared';
 import { Inject, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -91,34 +90,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const USER_BENEFIT_KEY = `user-benefit::${payload.senderId}`;
 
-    let userBenefit: string | BenefitUser = await Redis.getInstance()
-      .getClient()
-      .get(USER_BENEFIT_KEY);
-
-    if (!userBenefit) {
-      userBenefit = await this.benefitUserService.getUserBenefit(
-        payload.senderId
-      );
-
-      Redis.getInstance()
-        .getClient()
-        .set(USER_BENEFIT_KEY, JSON.stringify(userBenefit))
-        .then(() => {
-          this.logger.log(`User benefit for ${payload.senderId} set to Redis`);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `Error setting user benefit for ${payload.senderId}: ${error}`
-          );
-        });
-    } else {
-      userBenefit = JSON.parse(userBenefit);
-    }
+    const [userBenefit, user] = await Promise.all([
+      this.benefitUserService.getUserBenefit(payload.senderId),
+      this.userService.getUserById(payload.senderId),
+    ]);
 
     const receiverId = getReceiverId(payload.conversationId, payload.senderId);
 
     if (
-      !userBenefit ||
+      (!userBenefit && user.data.role === 'STUDENT') ||
       (typeof userBenefit === 'object' &&
         userBenefit.remaining <= 0 &&
         !userBenefit.connectedUserIds.includes(receiverId))
@@ -132,34 +112,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.chatService.emit('send_message', payload);
     this.server.to(receiverId).emit('receive_message', payload);
 
-    this.chatService.emit('connect_user', {
-      fromUserId: payload.senderId,
-      toUserId: receiverId,
-    });
-
-    Redis.getInstance()
-      .getClient()
-      .set(
-        USER_BENEFIT_KEY,
-        JSON.stringify(
-          typeof userBenefit === 'object'
-            ? {
-                ...userBenefit,
-                remaining: userBenefit.remaining - 1,
-                connectedUserIds: [...userBenefit.connectedUserIds, receiverId],
-              }
-            : {}
-        )
-      )
-      .then(() => {
-        this.logger.log(
-          `User benefit for ${payload.senderId} updated to Redis`
-        );
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Error updating user benefit for ${payload.senderId}: ${error}`
-        );
+    if (
+      user.data.role === 'STUDENT' &&
+      !userBenefit.connectedUserIds.includes(receiverId)
+    ) {
+      this.chatService.emit('connect_user', {
+        fromUserId: payload.senderId,
+        toUserId: receiverId,
       });
+
+      Redis.getInstance()
+        .getClient()
+        .set(
+          USER_BENEFIT_KEY,
+          JSON.stringify(
+            typeof userBenefit === 'object'
+              ? {
+                  ...userBenefit,
+                  remaining: userBenefit.remaining - 1,
+                  connectedUserIds: [
+                    ...userBenefit.connectedUserIds,
+                    receiverId,
+                  ],
+                }
+              : {}
+          )
+        )
+        .then(() => {
+          this.logger.log(
+            `User benefit for ${payload.senderId} updated to Redis`
+          );
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Error updating user benefit for ${payload.senderId}: ${error}`
+          );
+        });
+    }
   }
 }

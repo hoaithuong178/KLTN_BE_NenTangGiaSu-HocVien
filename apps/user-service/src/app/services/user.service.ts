@@ -9,6 +9,7 @@ import {
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import elasticClient from '../configs/elastic.config';
+import Redis from '../configs/redis.config';
 import { TUTOR_INDEX } from '../constants/elasticsearch.const';
 import { UserRepository } from '../repositories/user.repository';
 
@@ -102,12 +103,20 @@ export class UserService {
   }
 
   async getUserById(id: string) {
+    const userCached = await Redis.getInstance().getClient().get(`user::${id}`);
+
+    if (userCached) return JSON.parse(userCached);
+
     const user = await this.userRepository.findUserById(id);
 
     const response: BaseResponse<UserWithAvatar> = {
       statusCode: HttpStatus.OK,
       data: this.toUserWithAvatar(user),
     };
+
+    Redis.getInstance()
+      .getClient()
+      .set(`user::${id}`, JSON.stringify(response));
 
     return response;
   }

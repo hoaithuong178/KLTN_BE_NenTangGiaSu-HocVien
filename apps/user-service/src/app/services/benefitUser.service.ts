@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import Redis from '../configs/redis.config';
 import { BenefitUserRepository } from '../repositories/benefitUser.repository';
 import { CreateBenefitUser } from '../types';
 
@@ -11,7 +12,20 @@ export class BenefitUserService {
   async getUserBenefit(userId: string) {
     this.logger.log(`Getting user benefit for user ${userId}`);
 
-    return this.benefitUserRepository.getUserBenefit(userId);
+    const USER_BENEFIT_KEY = `user-benefit::${userId}`;
+    const userBenefitCached = await Redis.getInstance()
+      .getClient()
+      .get(USER_BENEFIT_KEY);
+
+    if (userBenefitCached) return JSON.parse(userBenefitCached);
+
+    const userBenefit = await this.benefitUserRepository.getUserBenefit(userId);
+
+    Redis.getInstance()
+      .getClient()
+      .set(USER_BENEFIT_KEY, JSON.stringify(userBenefit));
+
+    return userBenefit;
   }
 
   async connectUser(fromUserId: string, toUserId: string) {
