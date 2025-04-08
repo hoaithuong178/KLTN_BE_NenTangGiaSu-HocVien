@@ -1,4 +1,4 @@
-import { BaseResponse } from '@be/shared';
+import { BaseResponse, REDIS_KEY } from '@be/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import Redis from '../configs/redis.config';
@@ -29,8 +29,10 @@ export class BlockchainService {
   async getCoinPrice() {
     this.logger.log('Get coin price service');
 
+    const COIN_ETH_VND_KEY = REDIS_KEY.coinEthVnd();
+
     try {
-      const res = await Redis.getInstance().getClient().get(`coin-eth-vnd`);
+      const res = await Redis.getInstance().getClient().get(COIN_ETH_VND_KEY);
 
       if (res)
         return {
@@ -54,7 +56,7 @@ export class BlockchainService {
 
       Redis.getInstance()
         .getClient()
-        .set(`coin-eth-vnd`, price.toString(), {
+        .set(COIN_ETH_VND_KEY, price.toString(), {
           EX: 60, // 1 minute
         })
         .then(() => console.log('Coin price has been saved to Redis.'))

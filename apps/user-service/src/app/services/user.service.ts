@@ -3,6 +3,7 @@ import {
   BaseResponse,
   CreateUserWithGoogle,
   GetUserForAdmin,
+  REDIS_KEY,
   uploadImageFromUrl,
   UserWithAvatar,
 } from '@be/shared';
@@ -103,7 +104,9 @@ export class UserService {
   }
 
   async getUserById(id: string) {
-    const userCached = await Redis.getInstance().getClient().get(`user::${id}`);
+    const USER_KEY = REDIS_KEY.user(id);
+
+    const userCached = await Redis.getInstance().getClient().get(USER_KEY);
 
     if (userCached) return JSON.parse(userCached);
 
@@ -114,9 +117,7 @@ export class UserService {
       data: this.toUserWithAvatar(user),
     };
 
-    Redis.getInstance()
-      .getClient()
-      .set(`user::${id}`, JSON.stringify(response));
+    Redis.getInstance().getClient().set(USER_KEY, JSON.stringify(response));
 
     return response;
   }

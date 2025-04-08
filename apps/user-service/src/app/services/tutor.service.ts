@@ -3,6 +3,7 @@ import {
   BaseResponse,
   CreateTutor,
   PaginatedResponse,
+  REDIS_KEY,
   SearchTutor,
 } from '@be/shared';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -226,9 +227,11 @@ export class TutorService {
   async countBySpecializations() {
     this.logger.log('Counting tutors by specializations');
 
+    const TUTOR_SPECIALIZATIONS_KEY = REDIS_KEY.tutorSpecializations();
+
     const cachedData = await Redis.getInstance()
       .getClient()
-      .get('tutor-specializations');
+      .get(TUTOR_SPECIALIZATIONS_KEY);
 
     if (cachedData)
       return {
@@ -240,7 +243,7 @@ export class TutorService {
 
     Redis.getInstance()
       .getClient()
-      .set('tutor-specializations', JSON.stringify(counts), {
+      .set(TUTOR_SPECIALIZATIONS_KEY, JSON.stringify(counts), {
         EX: 60 * 5, // 5 minutes
       })
       .then(() => this.logger.log('Counting tutors by specializations cached'))

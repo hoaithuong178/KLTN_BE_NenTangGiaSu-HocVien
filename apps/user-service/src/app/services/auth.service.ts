@@ -9,6 +9,7 @@ import {
   JWTResponse,
   Login,
   Logout,
+  REDIS_KEY,
   Register,
   verifyRefreshToken,
 } from '@be/shared';
@@ -61,7 +62,7 @@ export class AuthService {
     const [email, phone, otpCode] = await Promise.all([
       this.userRepository.findUserByEmail(data.email),
       this.userRepository.findUserByPhone(data.phone),
-      Redis.getInstance().getClient().get(data.email),
+      Redis.getInstance().getClient().get(REDIS_KEY.registerOtp(data.email)),
     ]);
 
     this.logger.log(`OTP code: ${otpCode}`);
@@ -181,7 +182,7 @@ export class AuthService {
       }),
       Redis.getInstance()
         .getClient()
-        .set(email, otpCode, {
+        .set(REDIS_KEY.registerOtp(email), otpCode, {
           EX: 60 * 5,
         }),
     ]);
@@ -286,7 +287,9 @@ export class AuthService {
   async checkInvalidToken(id: string) {
     this.logger.log(`Checking invalid token for ${id}`);
 
-    const result = await Redis.getInstance().getClient().get(id);
+    const invalidTokenKey = REDIS_KEY.invalidToken(id);
+
+    const result = await Redis.getInstance().getClient().get(invalidTokenKey);
 
     if (result) return result === 'true';
 
@@ -294,7 +297,7 @@ export class AuthService {
 
     Redis.getInstance()
       .getClient()
-      .set(id, invalidToken ? 'true' : '', {
+      .set(invalidTokenKey, invalidToken ? 'true' : '', {
         EX: 60 * 60 * 24 * 7, // 1 week
       });
 

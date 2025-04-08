@@ -1,4 +1,4 @@
-import { CreateMessageDto } from '@be/shared';
+import { CreateMessageDto, REDIS_KEY } from '@be/shared';
 import { Inject, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -88,7 +88,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(client: Socket, payload: CreateMessageDto) {
     this.logger.log(`Received message: ${JSON.stringify(payload)}`);
 
-    const USER_BENEFIT_KEY = `user-benefit::${payload.senderId}`;
+    const USER_BENEFIT_KEY = REDIS_KEY.userBenefit(payload.senderId);
 
     const [userBenefit, user] = await Promise.all([
       this.benefitUserService.getUserBenefit(payload.senderId),
