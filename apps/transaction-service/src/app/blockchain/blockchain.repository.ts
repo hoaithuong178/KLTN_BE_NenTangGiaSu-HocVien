@@ -1,5 +1,5 @@
 import { Grade } from '.prisma/education-service';
-import { CreateContractEvent } from '@be/shared';
+import { BenefitPackagePurchasedEvent, CreateContractEvent } from '@be/shared';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import Web3, { Contract } from 'web3';
@@ -17,7 +17,9 @@ export class BlockchainRepository implements OnModuleInit {
     @Inject('BLOCKCHAIN_CONTRACT_SERVICE')
     private readonly contractClient: ClientProxy,
     @Inject('BLOCKCHAIN_CLASS_SERVICE')
-    private readonly classClient: ClientProxy
+    private readonly classClient: ClientProxy,
+    @Inject('BLOCKCHAIN_USER_SERVICE')
+    private readonly userClient: ClientProxy
   ) {
     const wsUrl = process.env.ETH_WS_URL;
 
@@ -31,6 +33,7 @@ export class BlockchainRepository implements OnModuleInit {
   async onModuleInit() {
     await this.connectWithRetry(0);
     this.listenToContractEvents();
+    this.listenToBenefitPackagePurchasedEvents();
   }
 
   private async connectWithRetry(retryCount: number) {
@@ -51,6 +54,65 @@ export class BlockchainRepository implements OnModuleInit {
           'Không thể kết nối đến blockchain sau nhiều lần thử lại'
         );
         throw error;
+      }
+    }
+  }
+
+  private async publicEvent<T>(
+    data: T,
+    pattern: string,
+    ...queues: ClientProxy[]
+  ) {
+    for (const queue of queues) {
+      let retryCount = 0;
+      let success = false;
+
+      while (!success && retryCount < this.maxRetries) {
+        try {
+          await new Promise<void>((resolve, reject) => {
+            queue.emit(pattern, data).subscribe({
+              next: () => {
+                this.logger.log(
+                  `Event với data ${JSON.stringify(
+                    data
+                  )} đã được publish thành công`
+                );
+                success = true;
+                resolve();
+              },
+              error: (error) => {
+                this.logger.error(
+                  `Lỗi khi publish event với data ${JSON.stringify(
+                    data
+                  )} (lần thử ${retryCount + 1}/${this.maxRetries}):`,
+                  error
+                );
+                reject(new Error(error));
+              },
+            });
+          });
+        } catch (error) {
+          this.logger.error(
+            `Lỗi khi publish event với data ${JSON.stringify(data)} (lần thử ${
+              retryCount + 1
+            }/${this.maxRetries}):`,
+            error
+          );
+
+          retryCount++;
+          if (retryCount < this.maxRetries) {
+            this.logger.warn(
+              `Thử lại publish event sau ${this.retryDelay}ms...`
+            );
+            await new Promise((resolve) =>
+              setTimeout(resolve, this.retryDelay)
+            );
+          } else {
+            this.logger.error(
+              `Không thể publish event sau ${this.maxRetries} lần thử`
+            );
+          }
+        }
       }
     }
   }
@@ -86,19 +148,54 @@ export class BlockchainRepository implements OnModuleInit {
         `Nhận được sự kiện ContractCreated mới: ${JSON.stringify(data)}`
       );
 
-      this.contractClient.emit('contract.created', data).subscribe({
-        next: () => this.logger.log('Event đã được publish thành công'),
-        error: (error) => this.logger.error('Lỗi khi publish event:', error),
-      });
-
-      this.classClient.emit('contract.created', data).subscribe({
-        next: () => this.logger.log('Event đã được publish thành công'),
-        error: (error) => this.logger.error('Lỗi khi publish event:', error),
-      });
+      this.publicEvent(
+        data,
+        'contract.created',
+        this.contractClient,
+        this.classClient
+      );
     });
 
     subscription.on('error', (error) => {
       this.logger.error('Lỗi khi lắng nghe sự kiện ContractCreated:', error);
+    });
+  }
+
+  private async listenToBenefitPackagePurchasedEvents() {
+    this.logger.log('Bắt đầu lắng nghe sự kiện BenefitPackagePurchased...');
+
+    const subscription = this.contract.events.BenefitPackagePurchased({
+      fromBlock: 'latest',
+    });
+
+    subscription.on('data', (event) => {
+      const returnValues = event.returnValues;
+      const data: BenefitPackagePurchasedEvent = {
+        id: returnValues.id as string,
+        userId: returnValues.userId as string,
+        benefitId: returnValues.benefitId as string,
+        amount: Number(returnValues.amount) / 10 ** 18,
+        quantity: Number(returnValues.quantity),
+        priceRate: Number(returnValues.priceRate),
+      };
+
+      this.logger.log(
+        `Nhận được sự kiện BenefitPackagePurchased mới: ${JSON.stringify(data)}`
+      );
+
+      this.publicEvent(
+        data,
+        'benefit.purchased',
+        this.contractClient,
+        this.userClient
+      );
+    });
+
+    subscription.on('error', (error) => {
+      this.logger.error(
+        'Lỗi khi lắng nghe sự kiện BenefitPackagePurchased:',
+        error
+      );
     });
   }
 

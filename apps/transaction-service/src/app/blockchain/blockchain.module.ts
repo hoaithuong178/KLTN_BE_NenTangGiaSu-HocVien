@@ -32,7 +32,11 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
 @Module({
   imports: [
     ClientsModule.register(
-      registerServices('BLOCKCHAIN_CONTRACT', 'BLOCKCHAIN_CLASS')
+      registerServices(
+        'BLOCKCHAIN_CONTRACT',
+        'BLOCKCHAIN_CLASS',
+        'BLOCKCHAIN_USER'
+      )
     ),
   ],
   controllers: [BlockchainController],

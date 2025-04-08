@@ -17,3 +17,12 @@ export class CreateContractEvent {
   mode!: boolean;
   schedules!: string[];
 }
+
+export class BenefitPackagePurchasedEvent {
+  id!: string;
+  userId!: string;
+  benefitId!: string;
+  amount!: number;
+  quantity!: number;
+  priceRate!: number;
+}

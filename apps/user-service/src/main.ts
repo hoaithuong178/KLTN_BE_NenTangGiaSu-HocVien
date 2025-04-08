@@ -38,6 +38,19 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>(createConnect('user_queue'));
   app.connectMicroservice<MicroserviceOptions>(createConnect('chat_queue'));
 
+  const blockchainApp =
+    await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+      transport: Transport.RMQ,
+      options: {
+        urls: [RABBIT_MQ_URL],
+        queue: 'blockchain_user_queue',
+        queueOptions: { durable: true },
+        noAck: false,
+      },
+    });
+
+  await blockchainApp.listen();
+
   await app.startAllMicroservices();
 
   await Redis.getInstance().getClient().connect();

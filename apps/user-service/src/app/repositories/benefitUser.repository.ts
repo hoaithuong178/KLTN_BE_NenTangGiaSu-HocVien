@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateBenefitUser } from '../types';
 
 @Injectable()
 export class BenefitUserRepository {
@@ -25,6 +26,35 @@ export class BenefitUserRepository {
     return this.prisma.benefitUser.findUnique({
       where: {
         userId,
+      },
+    });
+  }
+
+  upsertBenefitUser(data: CreateBenefitUser) {
+    return this.prisma.benefitUser.upsert({
+      where: {
+        userId: data.userId,
+      },
+      update: {
+        remaining: {
+          increment: data.remaining,
+        },
+        eventIds: {
+          push: data.eventId,
+        },
+      },
+      create: {
+        userId: data.userId,
+        remaining: data.remaining,
+        eventIds: [data.eventId],
+      },
+    });
+  }
+
+  findByEventId(eventId: string) {
+    return this.prisma.benefitUser.findFirst({
+      where: {
+        eventIds: { has: eventId },
       },
     });
   }

@@ -245,6 +245,7 @@ model BenefitUser {
   userId           String   @unique @map("user_id")
   remaining        Int      @map("remaining")
   connectedUserIds String[] @default([]) @map("connected_user_ids")
+  eventIds         String[] @default([]) @map("event_ids")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 

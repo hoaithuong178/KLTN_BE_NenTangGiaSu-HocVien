@@ -16472,12 +16472,12 @@
     "1742995155087": {
       "events": {},
       "links": {},
-      "address": "0xAd75BC9202C13a3F00aaA250f698b5c09965588f",
-      "transactionHash": "0x37e6e827773f8cf733a608c161b2325b38b4162906b4146e0bc29e2984aa4c84"
+      "address": "0x55C48ccD940Db43175ae4097FE8e061Ca65E59eC",
+      "transactionHash": "0x90848120d3f703f4c934db08325c651a50db27677dc5604b1e710cb7cfac5d1b"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-04-06T03:01:01.821Z",
+  "updatedAt": "2025-04-08T03:49:06.922Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './controllers/auth.controller';
 import { BenefitController } from './controllers/benefit.controller';
+import { BenefitUserController } from './controllers/benefitUser.controller';
 import { ChatController } from './controllers/chat.controller';
 import { FacebookAuthController } from './controllers/facebookAuth.controller';
 import { GoogleAuthController } from './controllers/googleAuth.controller';
@@ -82,6 +83,7 @@ const registerServices = (...names: Array<string>): ClientsModuleOptions => {
     FacebookAuthController,
     ViolateController,
     BenefitController,
+    BenefitUserController,
   ],
   providers: [
     AppService,

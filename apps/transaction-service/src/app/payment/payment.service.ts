@@ -1,6 +1,7 @@
 import { Payment } from '.prisma/transaction-service';
 import { BaseResponse } from '@be/shared';
 import { Injectable } from '@nestjs/common';
+import { CreatePayment } from '../types';
 import { PaymentRepository } from './payment.repository';
 
 @Injectable()
@@ -27,5 +28,13 @@ export class PaymentService {
     };
 
     return response;
+  }
+
+  async findById(id: string) {
+    return this.paymentRepository.findById(id);
+  }
+
+  async createPayment(data: CreatePayment) {
+    return this.paymentRepository.createPayment(data);
   }
 }
