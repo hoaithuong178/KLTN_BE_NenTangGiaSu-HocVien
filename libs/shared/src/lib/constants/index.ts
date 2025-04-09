@@ -10,4 +10,5 @@ export const REDIS_KEY = {
   tutorSpecializations: () => 'tutor-specializations',
   user: (id: string) => `user::${id}`,
   adminId: () => 'admin-id',
+  walletAddress: (id: string) => `wallet-address::${id}`,
 };

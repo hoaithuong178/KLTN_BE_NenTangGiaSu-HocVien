@@ -9,6 +9,7 @@ import {
   Delete,
   Get,
   Logger,
+  Param,
   Patch,
   Post,
   Request,
@@ -92,5 +93,12 @@ export class UserProfileController {
       req.user.id,
       data.walletAddress
     );
+  }
+
+  @Get(':id/wallet-address')
+  @UseGuards(AuthGuard)
+  async getWalletAddress(@Param('id') id: string) {
+    this.logger.log(`Get wallet address for user ${id}`);
+    return this.userProfileService.getWalletAddress(id);
   }
 }

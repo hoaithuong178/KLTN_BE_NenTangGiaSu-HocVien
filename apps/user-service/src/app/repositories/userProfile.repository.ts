@@ -70,4 +70,11 @@ export class UserProfileRepository {
       data: { walletAddress },
     });
   }
+
+  getWalletAddress(id: string) {
+    return this.prismaService.userProfile.findUnique({
+      where: { id },
+      select: { walletAddress: true },
+    });
+  }
 }

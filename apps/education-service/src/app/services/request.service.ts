@@ -10,6 +10,7 @@ import {
 } from '@be/shared';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import { RequestRepository } from '../repositories/request.repository';
 
 @Injectable()
@@ -25,30 +26,44 @@ export class RequestService {
   async create(data: CreateRequest) {
     this.logger.log('Tạo yêu cầu với dữ liệu: ' + JSON.stringify(data));
 
-    const createdRequest = await this.requestRepository.create(data);
+    try {
+      await lastValueFrom(
+        this.notificationClient.send(
+          { cmd: 'get_wallet_address' },
+          data.from.id
+        )
+      );
 
-    const notification: CreateNotificationRequest = {
-      title:
-        data.type === 'RECEIVE_CLASS'
-          ? 'Yêu cầu dạy học mới'
-          : 'Yêu cầu học mới',
-      message:
-        data.type === 'RECEIVE_CLASS'
-          ? `Gia sư ${data.from.name} muốn đăng ký dạy lớp của bạn`
-          : `Học viên ${data.from.name} muốn đăng ký học với bạn`,
-      recipientId: data.to.id,
-      type: data.type === 'TEACH_REQUEST' ? 'TUTOR_REQUEST' : 'RECEIVE_CLASS',
-      link: createdRequest.id,
-    };
+      const createdRequest = await this.requestRepository.create(data);
 
-    this.notificationClient.emit('create_notification', notification);
+      const notification: CreateNotificationRequest = {
+        title:
+          data.type === 'RECEIVE_CLASS'
+            ? 'Yêu cầu dạy học mới'
+            : 'Yêu cầu học mới',
+        message:
+          data.type === 'RECEIVE_CLASS'
+            ? `Gia sư ${data.from.name} muốn đăng ký dạy lớp của bạn`
+            : `Học viên ${data.from.name} muốn đăng ký học với bạn`,
+        recipientId: data.to.id,
+        type: data.type === 'TEACH_REQUEST' ? 'TUTOR_REQUEST' : 'RECEIVE_CLASS',
+        link: createdRequest.id,
+      };
 
-    const response: BaseResponse<Request> = {
-      statusCode: HttpStatus.CREATED,
-      data: createdRequest,
-    };
+      this.notificationClient.emit('create_notification', notification);
 
-    return response;
+      const response: BaseResponse<Request> = {
+        statusCode: HttpStatus.CREATED,
+        data: createdRequest,
+      };
+
+      return response;
+    } catch (error) {
+      throw new RpcException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: error.message || 'Lỗi khi tạo yêu cầu',
+      });
+    }
   }
 
   async findAll() {
@@ -179,7 +194,7 @@ export class RequestService {
     this.notificationClient.emit('create_notification', notification);
   }
 
-  private validatePermission(
+  private async validatePermission(
     request: Request,
     status: RequestStatus,
     userId: string,
@@ -190,6 +205,21 @@ export class RequestService {
 
     switch (status) {
       case 'ACCEPTED':
+        try {
+          await lastValueFrom(
+            this.notificationClient.send({ cmd: 'get_wallet_address' }, fromId)
+          );
+        } catch (error) {
+          throw new RpcException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            message: error.message || 'Người dùng không tồn tại',
+          });
+        }
+
+        if (fromId !== userId) {
+          throw new RpcException('Bạn không có quyền thực hiện hành động này');
+        }
+        break;
       case 'REJECTED':
         if (fromId !== userId) {
           throw new RpcException('Bạn không có quyền thực hiện hành động này');

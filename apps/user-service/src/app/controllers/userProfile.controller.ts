@@ -67,4 +67,9 @@ export class UserProfileController {
   }) {
     return this.userProfileService.updateWalletAddress(userId, walletAddress);
   }
+
+  @MessagePattern({ cmd: 'get_wallet_address' })
+  async getWalletAddress(id: string) {
+    return this.userProfileService.getWalletAddress(id);
+  }
 }

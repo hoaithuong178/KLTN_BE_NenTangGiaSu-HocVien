@@ -2,12 +2,14 @@ import { UserProfile } from '.prisma/user-service';
 import {
   BaseResponse,
   CreateUserProfile,
+  REDIS_KEY,
   UpdateUserProfile,
   uploadFile,
 } from '@be/shared';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import Redis from '../configs/redis.config';
 import { UserRepository } from '../repositories/user.repository';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
 
@@ -16,7 +18,7 @@ export class UserProfileService {
   private readonly logger: Logger = new Logger(UserProfileService.name);
 
   constructor(
-    private readonly UserProfileRepository: UserProfileRepository,
+    private readonly userProfileRepository: UserProfileRepository,
     private readonly userRepository: UserRepository,
     @Inject('CHATBOT_USER_SERVICE')
     private readonly chatbotUserService: ClientProxy,
@@ -44,7 +46,7 @@ export class UserProfileService {
   async create(data: CreateUserProfile) {
     this.logger.log(`Creating user profile with data: ${JSON.stringify(data)}`);
 
-    const user = await this.UserProfileRepository.getUserProfileById(data.id);
+    const user = await this.userProfileRepository.getUserProfileById(data.id);
 
     if (user) {
       throw new RpcException({
@@ -62,7 +64,7 @@ export class UserProfileService {
       });
     }
 
-    const userProfile = await this.UserProfileRepository.createUserProfile({
+    const userProfile = await this.userProfileRepository.createUserProfile({
       ...data,
       avatar,
     });
@@ -85,7 +87,7 @@ export class UserProfileService {
   async update(id: string, data: UpdateUserProfile) {
     this.logger.log(`Updating user profile with id: ${id}`);
 
-    const user = await this.UserProfileRepository.getUserProfileById(id);
+    const user = await this.userProfileRepository.getUserProfileById(id);
 
     if (!user) {
       throw new RpcException({
@@ -103,7 +105,7 @@ export class UserProfileService {
       });
     }
 
-    const userProfile = await this.UserProfileRepository.updateUserProfile(id, {
+    const userProfile = await this.userProfileRepository.updateUserProfile(id, {
       ...data,
       avatar,
     });
@@ -125,7 +127,7 @@ export class UserProfileService {
   async get(id: string) {
     this.logger.log(`Getting user profile with id: ${id}`);
 
-    const userProfile = await this.UserProfileRepository.getUserProfileById(id);
+    const userProfile = await this.userProfileRepository.getUserProfileById(id);
 
     if (!userProfile) {
       throw new RpcException({
@@ -146,10 +148,10 @@ export class UserProfileService {
     this.logger.log(`Deleting user profile with id: ${id}`);
 
     try {
-      const userProfile = await this.UserProfileRepository.getUserProfileById(
+      const userProfile = await this.userProfileRepository.getUserProfileById(
         id
       );
-      await this.UserProfileRepository.deleteUserProfile(id);
+      await this.userProfileRepository.deleteUserProfile(id);
 
       this.updateAvatar(userProfile.id, '');
 
@@ -176,7 +178,7 @@ export class UserProfileService {
   }
 
   async updateWalletAddress(id: string, walletAddress: string) {
-    const userProfile = await this.UserProfileRepository.getUserProfileById(id);
+    const userProfile = await this.userProfileRepository.getUserProfileById(id);
 
     if (!userProfile) {
       throw new RpcException({
@@ -193,12 +195,52 @@ export class UserProfileService {
     }
 
     const updatedUserProfile =
-      await this.UserProfileRepository.updateWalletAddress(id, walletAddress);
+      await this.userProfileRepository.updateWalletAddress(id, walletAddress);
 
     const response: BaseResponse<UserProfile> = {
       statusCode: HttpStatus.OK,
       data: updatedUserProfile,
     };
+
+    return response;
+  }
+
+  async getWalletAddress(id: string) {
+    this.logger.log(`Getting wallet address with id: ${id}`);
+
+    const walletAddressCache = await Redis.getInstance()
+      .getClient()
+      .get(REDIS_KEY.walletAddress(id));
+
+    if (walletAddressCache) return JSON.parse(walletAddressCache);
+
+    const userProfile = await this.userProfileRepository.getWalletAddress(id);
+
+    if (!userProfile) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Hồ sơ người dùng không tồn tại',
+      });
+    }
+
+    if (!userProfile.walletAddress) {
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Người dùng chưa có địa chỉ ví',
+      });
+    }
+
+    const response: BaseResponse<string> = {
+      statusCode: HttpStatus.OK,
+      data: userProfile.walletAddress,
+    };
+
+    Redis.getInstance()
+      .getClient()
+      .set(REDIS_KEY.walletAddress(id), JSON.stringify(response.data))
+      .catch((err) => {
+        this.logger.error(`Lưu cache wallet address thất bại: ${err}`);
+      });
 
     return response;
   }

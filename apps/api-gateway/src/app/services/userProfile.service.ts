@@ -39,4 +39,8 @@ export class UserProfileService {
       )
     );
   }
+
+  getWalletAddress(id: string) {
+    return lastValueFrom(this.service.send({ cmd: 'get_wallet_address' }, id));
+  }
 }
