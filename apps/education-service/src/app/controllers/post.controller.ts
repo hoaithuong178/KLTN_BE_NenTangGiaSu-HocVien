@@ -52,4 +52,9 @@ export class PostController {
   findByStatus(status: PostStatus) {
     return this.postService.findByStatus(status);
   }
+
+  @MessagePattern({ cmd: 'get-posts-by-user-id' })
+  findByUserId(id: string) {
+    return this.postService.findByUserId(id);
+  }
 }

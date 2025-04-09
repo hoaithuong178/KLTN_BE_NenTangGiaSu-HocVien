@@ -120,4 +120,19 @@ export class PostRepository {
       },
     });
   }
+
+  findByUserId(id: string) {
+    return this.prismaService.post.findMany({
+      where: {
+        user: {
+          is: {
+            id,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }

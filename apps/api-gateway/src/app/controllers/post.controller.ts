@@ -125,4 +125,13 @@ export class PostController {
     this.logger.log(`Get posts by status: ${status}`);
     return this.postService.getPostsByStatus(status);
   }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  @Roles([Role.STUDENT])
+  async getPostsByUserId(@Request() req: AuthRequest) {
+    this.logger.log(`Get posts by user ID: ${req.user.id}`);
+
+    return this.postService.getPostsByUserId(req.user.id);
+  }
 }

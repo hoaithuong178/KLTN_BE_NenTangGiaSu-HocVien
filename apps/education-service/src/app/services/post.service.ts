@@ -439,4 +439,15 @@ export class PostService {
     };
     return response;
   }
+
+  async findByUserId(id: string) {
+    this.logger.log('Getting posts by user ID: ' + id);
+    const posts = await this.postRepository.findByUserId(id);
+
+    const response: BaseResponse<Post[]> = {
+      statusCode: HttpStatus.OK,
+      data: posts,
+    };
+    return response;
+  }
 }

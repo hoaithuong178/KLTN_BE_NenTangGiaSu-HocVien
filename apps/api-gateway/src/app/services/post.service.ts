@@ -55,4 +55,10 @@ export class PostService {
       this.postService.send({ cmd: 'get-posts-by-status' }, status)
     );
   }
+
+  getPostsByUserId(id: string) {
+    return lastValueFrom(
+      this.postService.send({ cmd: 'get-posts-by-user-id' }, id)
+    );
+  }
 }
