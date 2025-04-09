@@ -167,6 +167,7 @@ enum NotificationType {
   PRICE_NEGOTIATION
   TEACH_REQUEST
   RECEIVE_CLASS
+  ACCEPTED_REQUEST
 }
 
 model Notification {

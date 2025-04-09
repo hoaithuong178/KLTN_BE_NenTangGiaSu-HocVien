@@ -246,6 +246,26 @@ export class RequestService {
     this.validatePermission(request, status, userId, feePerSession);
   }
 
+  private createClassNotification(request: Request) {
+    if (request.status !== RequestStatus.ACCEPTED) {
+      return;
+    }
+
+    const notification: CreateNotificationRequest = {
+      title: 'Tạo lớp học mới',
+      message:
+        request.type === 'TEACH_REQUEST'
+          ? `Bạn đã chấp nhận yêu cầu học của ${request.from.name}, hãy tạo lớp học mới ngay.`
+          : `Yêu cầu nhận lớp của bạn đã được ${request.to.name} chấp nhận, hãy tạo lớp học mới ngay.`,
+      recipientId:
+        request.type === 'TEACH_REQUEST' ? request.to.id : request.from.id,
+      type: 'ACCEPTED_REQUEST',
+      link: request.id,
+    };
+
+    this.notificationClient.emit('create_notification', notification);
+  }
+
   async updateStatus({
     id,
     userId,
@@ -273,6 +293,7 @@ export class RequestService {
     );
 
     this.sendNotification(updatedRequest);
+    this.createClassNotification(updatedRequest);
 
     const response: BaseResponse<Request> = {
       statusCode: HttpStatus.OK,
