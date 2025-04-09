@@ -225,4 +225,27 @@ export class UserService {
 
     this.logger.log('Finished syncing all tutors to ElasticSearch');
   }
+
+  async getAdminId() {
+    this.logger.log('Getting admin id');
+
+    const adminIdCached = await Redis.getInstance()
+      .getClient()
+      .get(REDIS_KEY.adminId());
+
+    if (adminIdCached) return JSON.parse(adminIdCached);
+
+    const adminId = await this.userRepository.getAdminId();
+
+    const response: BaseResponse<string> = {
+      statusCode: HttpStatus.OK,
+      data: adminId.id,
+    };
+
+    Redis.getInstance()
+      .getClient()
+      .set(REDIS_KEY.adminId(), JSON.stringify(response));
+
+    return response;
+  }
 }

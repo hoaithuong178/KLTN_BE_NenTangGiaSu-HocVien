@@ -37,4 +37,8 @@ export class UserService {
       this.userService.send({ cmd: 'get_user_for_admin' }, data)
     );
   }
+
+  getAdminId() {
+    return lastValueFrom(this.userService.send({ cmd: 'get_admin_id' }, {}));
+  }
 }

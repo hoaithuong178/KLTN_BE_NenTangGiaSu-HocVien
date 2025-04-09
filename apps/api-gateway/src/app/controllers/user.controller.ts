@@ -52,4 +52,12 @@ export class UserController {
 
     return await this.userService.getUserForAdmin(query);
   }
+
+  @Get('admin/id')
+  @UseGuards(AuthGuard)
+  async getAdminId() {
+    this.logger.log('Received request to get admin id');
+
+    return await this.userService.getAdminId();
+  }
 }

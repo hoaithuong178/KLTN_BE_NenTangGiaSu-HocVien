@@ -135,4 +135,15 @@ export class UserRepository {
       },
     });
   }
+
+  getAdminId() {
+    return this.prismaService.user.findFirst({
+      where: {
+        role: 'ADMIN',
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
 }

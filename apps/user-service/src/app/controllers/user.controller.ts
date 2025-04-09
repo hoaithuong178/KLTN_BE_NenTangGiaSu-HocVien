@@ -37,4 +37,9 @@ export class UserController {
   getUserForAdmin(data: GetUserForAdmin) {
     return this.userService.getUserForAdmin(data);
   }
+
+  @MessagePattern({ cmd: 'get_admin_id' })
+  getAdminId() {
+    return this.userService.getAdminId();
+  }
 }

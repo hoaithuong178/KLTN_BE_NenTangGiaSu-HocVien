@@ -9,4 +9,5 @@ export const REDIS_KEY = {
   invalidToken: (id: string) => `invalid-token::${id}`,
   tutorSpecializations: () => 'tutor-specializations',
   user: (id: string) => `user::${id}`,
+  adminId: () => 'admin-id',
 };
