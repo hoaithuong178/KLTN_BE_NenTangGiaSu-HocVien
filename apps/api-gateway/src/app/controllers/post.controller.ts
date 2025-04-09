@@ -64,6 +64,15 @@ export class PostController {
     return this.postService.searchPosts(searchRequest);
   }
 
+  @Get('me')
+  @UseGuards(AuthGuard)
+  @Roles([Role.STUDENT])
+  async getPostsByUserId(@Request() req: AuthRequest) {
+    this.logger.log(`Get posts by user ID: ${req.user.id}`);
+
+    return this.postService.getPostsByUserId(req.user.id);
+  }
+
   @Get(':id')
   async getPostById(@Param('id') id: string) {
     this.logger.log(`Get post by id ${id}`);
@@ -124,14 +133,5 @@ export class PostController {
   async getPostsByStatus(@Param('status') status: PostStatus) {
     this.logger.log(`Get posts by status: ${status}`);
     return this.postService.getPostsByStatus(status);
-  }
-
-  @Get('me')
-  @UseGuards(AuthGuard)
-  @Roles([Role.STUDENT])
-  async getPostsByUserId(@Request() req: AuthRequest) {
-    this.logger.log(`Get posts by user ID: ${req.user.id}`);
-
-    return this.postService.getPostsByUserId(req.user.id);
   }
 }
