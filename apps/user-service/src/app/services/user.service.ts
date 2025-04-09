@@ -199,31 +199,42 @@ export class UserService {
   async syncAllTutorsToElasticSearch() {
     this.logger.log('Starting sync all tutors to ElasticSearch');
 
-    const tutors = await this.userRepository.getAllTutors();
+    try {
+      const tutors = await this.userRepository.getAllTutors();
 
-    for (const tutor of tutors) {
-      try {
-        const { userProfiles, tutorProfiles, ...restData } = tutor;
+      // Xóa index cũ nếu tồn tại
+      const indexExists = await elasticClient.indices.exists({
+        index: TUTOR_INDEX,
+      });
 
-        const newData = {
-          ...restData,
-          userProfile: userProfiles.length ? userProfiles[0] : null,
-          tutorProfile: tutorProfiles.length ? tutorProfiles[0] : null,
-        };
-
-        await elasticClient.index({
+      if (indexExists) {
+        await elasticClient.indices.delete({
           index: TUTOR_INDEX,
-          id: tutor.id,
-          body: newData,
         });
-
-        this.logger.log(`Synced tutor ${tutor.id} to ElasticSearch`);
-      } catch (error) {
-        this.logger.error(`Failed to sync tutor ${tutor.id}:`, error);
       }
-    }
 
-    this.logger.log('Finished syncing all tutors to ElasticSearch');
+      // Tạo index mới
+      await elasticClient.indices.create({
+        index: TUTOR_INDEX,
+      });
+
+      // Bulk insert posts vào Elasticsearch
+      const body = tutors.flatMap((post) => [
+        { index: { _index: TUTOR_INDEX, _id: post.id } },
+        post,
+      ]);
+
+      if (body.length > 0) {
+        const response = await elasticClient.bulk({ body });
+        if (response.errors) {
+          this.logger.error('Lỗi khi bulk insert vào Elasticsearch');
+        }
+      }
+
+      this.logger.log(`Đã đồng bộ ${tutors.length} tutors vào Elasticsearch`);
+    } catch (error) {
+      this.logger.error('Lỗi khi đồng bộ tutors vào Elasticsearch', error);
+    }
   }
 
   async getAdminId() {
